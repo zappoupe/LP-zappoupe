@@ -1,0 +1,469 @@
+/* src/components/Hero/Hero.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400;1,600&display=swap');
+
+/* --- 1. SEÇÃO PRINCIPAL --- */
+.hero-section {
+    width: 100vw;
+    height: 100vh;
+    background-color: #f2f7e8;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.hero-section::before {
+    content: "";
+    background-color: #153703;
+    height: 14px;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+}
+
+.hero-section::after {
+    content: "";
+    background-color: #153703;
+    height: 14px;
+    width: 100vw;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+}
+
+/* --- 2. FUNDO --- */
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+.hero-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+}
+
+/* --- 3. CANVAS DESKTOP (1280x832) --- */
+.HERO {
+    background-color: transparent;
+    height: 832px;
+    width: 1280px;
+    position: relative;
+    z-index: 10;
+    transform: scale(min(1, calc(100vh / 832)));
+}
+
+/* --- TEXTOS --- */
+.HERO .div {
+    height: 339px;
+    left: 70px;
+    position: absolute;
+    top: 178px;
+    width: 754px;
+}
+
+.HERO .frame-wrapper {
+    display: flex;
+    height: 307px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 754px;
+}
+
+.HERO .frame-2 {
+    height: 307px;
+    position: relative;
+    width: 754px;
+}
+
+.HERO .p {
+    align-items: center;
+    color: #355824;
+    display: flex;
+    font-weight: 800;
+    font-size: 24px;
+    height: 46px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 90px;
+    position: absolute;
+    text-shadow: 0px 4px 4px #00000040;
+    top: 0;
+    white-space: nowrap;
+    width: 469px;
+}
+
+.HERO .text-wrapper-3 {
+    align-items: center;
+    color: #143703;
+    display: flex;
+    font-weight: 800;
+    font-size: 64px;
+    height: 103px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 90px;
+    position: absolute;
+    text-shadow: 0px 4px 4px #00000040;
+    top: 28px;
+    white-space: nowrap;
+    width: 418px;
+}
+
+.HERO .text-wrapper-2 {
+    color: #143703;
+    text-shadow: 0px 4px 4px #00000040;
+    -webkit-text-stroke: none;
+    font-weight: 800;
+    font-size: 96px;
+    height: 206px;
+    left: -1px;
+    letter-spacing: 0;
+    line-height: 90px;
+    position: absolute;
+    top: 100px;
+    width: 754px;
+}
+
+.HERO .div-wrapper {
+    display: flex;
+    height: 37px;
+    left: 0;
+    position: absolute;
+    top: 302px;
+    width: 426px;
+}
+
+.HERO .frame-3 {
+    display: flex;
+    width: 426px;
+}
+
+.HERO .text-wrapper-4 {
+    align-items: center;
+    color: #2c371f;
+    display: flex;
+    font-size: 15px;
+    font-style: italic;
+    font-weight: 400;
+    height: 37px;
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: normal;
+    text-align: center;
+    width: 426px;
+}
+
+/* --- BOTÃO --- */
+.HERO .frame {
+    -webkit-backdrop-filter: blur(2.0px) brightness(100.0%) saturate(100.0%);
+    backdrop-filter: blur(2.0px) brightness(100.0%) saturate(100.0%);
+    background-color: #5a782a33;
+    border: 1px solid;
+    border-color: #6f8555;
+    border-radius: 50px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 1px 0 0 rgba(255, 255, 255, 0.32),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.13),
+        inset -1px 0 1px rgba(0, 0, 0, 0.11);
+    display: flex;
+    height: 54px;
+    left: 468px;
+    overflow: hidden;
+    position: absolute;
+    top: 619px;
+    width: 345px;
+    cursor: pointer;
+    transition: all 0.3s ease-out;
+}
+
+.HERO .frame:hover {
+    box-shadow: 0 0 15px rgba(111, 133, 85, 0.7);
+    background-color: rgba(90, 120, 42, 0.4);
+    transform: translateY(-2px);
+}
+
+.HERO .frame ::selection {
+    background-color: #b9da7f;
+    color: #143703;
+}
+.HERO .frame ::-moz-selection {
+    background-color: #b9da7f;
+    color: #143703;
+}
+
+.HERO .text-wrapper {
+    align-items: center;
+    color: #143703;
+    display: flex;
+    font-size: 15px;
+    font-style: italic;
+    font-weight: 600;
+    height: 18px;
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: normal;
+    margin-left: 35px;
+    margin-top: 18px;
+    text-align: center;
+    white-space: nowrap;
+    width: 274px;
+}
+
+/* --- IMAGEM --- */
+.HERO .objeto {
+    aspect-ratio: 0.7;
+    height: 72.96%;
+    left: 66.33%;
+    position: absolute;
+    top: 32.04%;
+    width: 33.67%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* --- ANIMAÇÕES FADE-IN --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.HERO .p,
+.HERO .text-wrapper-3,
+.HERO .text-wrapper-2,
+.HERO .text-wrapper-4,
+.HERO .frame,
+.HERO .objeto {
+    opacity: 0;
+    animation-name: fadeIn;
+    animation-duration: 0.8s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+.HERO .p             { animation-delay: 0.1s; }
+.HERO .text-wrapper-3 { animation-delay: 0.3s; }
+.HERO .text-wrapper-2 { animation-delay: 0.5s; }
+.HERO .text-wrapper-4 { animation-delay: 0.7s; }
+.HERO .frame          { animation-delay: 0.9s; }
+.HERO .objeto         { animation-delay: 1.1s; }
+
+/* =====================================================
+   MOBILE — ABORDAGEM COMPLETAMENTE NOVA
+   Substituímos o layout do Figma (position:absolute)
+   por um flexbox limpo, sem depender de "order" em
+   elementos com position herdado.
+   ===================================================== */
+@media (max-width: 900px) {
+
+    /* Barras verde escura: some no mobile */
+    .hero-section::before,
+    .hero-section::after {
+        display: none;
+    }
+
+    /* A seção ocupa tudo e permite scroll se necessário */
+    .hero-section {
+        height: auto;
+        min-height: 100svh; /* svh = safe viewport height (respeita barra do browser) */
+        padding: 50px 24px 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    /* O canvas do Figma vira um flex container vertical */
+    .HERO {
+        /* Anula o tamanho fixo e o scale do desktop */
+        width: 100%;
+        height: auto;
+        max-width: 480px;
+        transform: none;
+
+        /* Layout mobile */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        position: relative; /* mantém position para o botão absoluto não escapar */
+    }
+
+    /* ── BLOCO DE TEXTOS ── */
+    /* .div é a caixa de textos — reseta o absolute e vira flex */
+    .HERO .div {
+        position: static;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        order: 1;
+    }
+
+    .HERO .frame-wrapper {
+        position: static;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .HERO .frame-2 {
+        position: static;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    /* "VOCÊ FALA, O ZAPPOUPE ENTENDE." */
+    .HERO .p {
+        position: static;
+        width: auto;
+        height: auto;
+        white-space: normal;
+        font-size: 11px;
+        line-height: 1.4;
+        text-align: center;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+    }
+
+    /* "SUA GRANA" */
+    .HERO .text-wrapper-3 {
+        position: static;
+        width: auto;
+        height: auto;
+        font-size: 56px;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        margin-bottom: 2px;
+    }
+
+    /* "FINALMENTE SE ORGANIZA." */
+    .HERO .text-wrapper-2 {
+        position: static;
+        width: auto;
+        height: auto;
+        font-size: 34px;
+        line-height: 1;
+        text-align: center;
+        color: #355824;
+        text-shadow: none;
+        -webkit-text-stroke: none;
+        margin-bottom: 14px;
+    }
+
+    /* Wrapper do subtítulo */
+    .HERO .div-wrapper {
+        position: static;
+        width: 100%;
+        height: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .HERO .frame-3 {
+        width: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* "Se o dinheiro sempre some..." */
+    .HERO .text-wrapper-4 {
+        width: auto;
+        max-width: 300px;
+        height: auto;
+        font-size: 14px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* ── IMAGEM DA MULHER ── */
+    .HERO .objeto {
+        position: static;
+        width: 115%;           /* Maior que o container — sangra pelas bordas */
+        max-width: 460px;
+        height: auto;
+        aspect-ratio: 0.7;
+        object-fit: contain;
+        object-position: bottom center; /* Ancora o pé na borda inferior */
+        order: 2;
+        margin-top: 12px;
+        margin-bottom: -80px; /* Empurra pra baixo até encostar na borda da section */
+        align-self: center;
+    }
+
+    /* ── BOTÃO ── */
+    .HERO .frame {
+        position: relative;
+        left: auto;
+        top: auto;
+        width: 88%;
+        max-width: 320px;
+        height: 52px;
+        order: 3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50px;
+        background-color: rgba(90, 120, 42, 0.88);
+        z-index: 10;
+        /* Botão flutua sobre a parte inferior da imagem */
+        margin-top: -52px;
+        margin-bottom: 24px;
+        transform: none;
+    }
+
+    .HERO .frame:hover {
+        transform: translateY(-2px);
+    }
+
+    .HERO .text-wrapper {
+        margin: 0;
+        width: auto;
+        height: auto;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        color: #f2f7e8;
+        text-align: center;
+        white-space: nowrap;
+    }
+}
+
+/* Telas muito pequenas (< 360px) */
+@media (max-width: 360px) {
+    .HERO .text-wrapper-3 { font-size: 46px; }
+    .HERO .text-wrapper-2 { font-size: 28px; }
+}

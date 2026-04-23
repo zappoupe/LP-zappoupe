@@ -1,0 +1,283 @@
+/* src/components/FloatingNav/FloatingNav.css */
+
+.floating-nav-container {
+    background-color: #f2f7e8;
+    border: 1px solid #2e4523;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    height: 62px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    
+    /* Posição Fixa e Centralizada */
+    position: fixed;
+    bottom: 40px; 
+    left: 50%;
+    
+    /* Estado inicial */
+    opacity: 0;
+    transform: translate(-50%, 50px);
+    pointer-events: none;
+    
+    /* ANIMAÇÃO PRINCIPAL */
+    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                opacity 0.4s ease, 
+                transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                border-color 0.4s ease,
+                box-shadow 0.4s ease,
+                padding 0.6s ease;
+    z-index: 9999; 
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden; 
+}
+
+/* --- ESTADO 1: VISÍVEL E COMPLETO --- */
+.floating-nav-container.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+    width: 792px; 
+    padding: 0; 
+}
+
+/* --- ESTADO 2: COLAPSADO --- */
+.floating-nav-container.collapsed {
+    width: 330px; 
+    justify-content: space-between; 
+    padding: 0 12px; 
+    border-color: #153703; 
+    box-shadow: 0 10px 25px rgba(21, 55, 3, 0.15);
+}
+
+/* --- CONTEÚDO DA NAVBAR --- */
+.nav-logo {
+    height: 44px;
+    margin-left: 11px;
+    width: 46px;
+    user-select: none;
+    pointer-events: none;
+    flex-shrink: 0; 
+    transition: margin 0.6s ease;
+}
+
+.floating-nav-container.collapsed .nav-logo {
+    margin-left: 0;
+}
+
+/* Contêiner de links e ícones */
+.nav-content {
+    display: flex;
+    gap: 27px;
+    height: 100%;
+    margin-left: 140px; 
+    align-items: center;
+    transition: margin 0.6s cubic-bezier(0.25, 1, 0.5, 1), gap 0.6s ease;
+}
+
+.floating-nav-container.collapsed .nav-content {
+    margin: 0;
+    gap: 12px; 
+}
+
+/* Item de Navegação (Ícone + Texto) */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    position: relative;
+    color: #2e4523;
+    transition: all 0.4s ease;
+}
+
+.nav-item:hover {
+    color: #607655;
+}
+
+/* Ícones (Escondidos por padrão no estado completo) */
+.nav-icon {
+    width: 0; 
+    height: 20px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.4s ease, transform 0.4s ease, width 0.4s ease;
+}
+
+/* Textos (Visíveis por padrão) */
+.nav-text {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap; 
+    transition: opacity 0.4s ease, width 0.4s ease;
+    opacity: 1;
+}
+
+/* --- ESTILOS EXCLUSIVOS DO ESTADO COLAPSADO --- */
+
+.floating-nav-container.collapsed .nav-text {
+    opacity: 0;
+    width: 0; 
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-nav-container.collapsed .nav-item {
+    background-color: #a5ca92;
+    border: 1px solid #153703;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+}
+
+.floating-nav-container.collapsed .nav-item:hover {
+    background-color: #bfd5a4;
+}
+
+.floating-nav-container.collapsed .nav-icon {
+    opacity: 1;
+    transform: scale(1);
+    width: 20px; 
+    margin-right: 0; 
+}
+
+/* --- ÁREA E BOTÃO DE LOGIN --- */
+.nav-login-area {
+    margin-left: auto;
+    margin-right: 11px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    transition: margin 0.6s ease;
+}
+
+.floating-nav-container.collapsed .nav-login-area {
+    margin: 0;
+}
+
+.nav-login-btn {
+    background-color: #607655;
+    border: 1px solid #1e1e1e;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    
+    width: 153px;
+    height: 41px;
+    gap: 10px;
+}
+
+.nav-login-btn:hover {
+    background-color: #4a5c41;
+}
+
+/* Ícone de login compacto */
+.login-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.login-text {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.4s ease;
+}
+
+/* --- ESTADO COLAPSADO DO BOTÃO DE LOGIN --- */
+.floating-nav-container.collapsed .nav-login-btn {
+    width: 44px; 
+    height: 44px;
+    background-color: #607655; 
+    border-color: #153703;
+    padding: 0;
+}
+
+.floating-nav-container.collapsed .login-text {
+    opacity: 0; 
+    display: none;
+}
+
+.floating-nav-container.collapsed .login-icon {
+    opacity: 1; 
+    display: block;
+}
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 1024px) {
+    .floating-nav-container.visible {
+        width: 90%;
+        max-width: 340px;
+        justify-content: space-between;
+        padding: 0 12px;
+    }
+    
+    .nav-logo, .nav-login-area, .nav-content {
+        margin: 0 !important;
+    }
+
+    .nav-content {
+        gap: 12px;
+    }
+
+    .nav-text { display: none !important; }
+
+    .nav-item {
+        background-color: #a5ca92 !important;
+        border: 1px solid #153703 !important;
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+        justify-content: center !important;
+    }
+
+    .nav-icon {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+        width: 20px !important;
+    }
+
+    .nav-login-btn {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+    }
+
+    .login-text { display: none !important; }
+    .login-icon { opacity: 1 !important; display: block !important; }
+}
+
+
+/* =========================================================
+   AJUSTE FINO MANUAL DOS ÍCONES DENTRO DAS BOLINHAS
+   Aqui você mexe apenas no desenho do SVG!
+========================================================= */
+
+/* 1. Ícone da Casinha (INÍCIO) */
+.floating-nav-container.collapsed .nav-item:nth-child(1) .nav-icon {
+    /* Mude os ZEROs abaixo. Ex: translate(2px, -1px) move 2px pra direita e 1px pra cima */
+    transform: translate(4px, 0px) scale(1); 
+}
+
+/* 2. Ícone do Cifrão (PLANOS) */
+.floating-nav-container.collapsed .nav-item:nth-child(2) .nav-icon {
+    transform: translate(5px, 0px) scale(1);
+}
+
+/* 3. Ícone do Balãozinho (DÚVIDAS FREQUENTES) */
+.floating-nav-container.collapsed .nav-item:nth-child(3) .nav-icon {
+    transform: translate(5px, 0px) scale(1);
+}
+
+/* 4. Ícone do Bonequinho (LOGIN) */
+.floating-nav-container.collapsed .login-icon {
+    transform: translate(0px, 0px);
+}

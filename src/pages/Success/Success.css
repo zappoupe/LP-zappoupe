@@ -1,0 +1,114 @@
+/* src/pages/Success/Success.css */
+.success-section {
+    width: 100vw;
+    min-height: 100vh;
+    background-color: #f2f7e8; /* Fundo padrão do site */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Montserrat', sans-serif;
+    padding: 20px;
+}
+
+.success-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    /* Sombra suave esverdeada acompanhando o padrão do checkout */
+    box-shadow: 0 10px 40px rgba(21, 55, 3, 0.08); 
+    border: 1px solid #ddefc3;
+}
+
+.success-icon-container {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Garante que o SVG herde as cores corretamente se necessário */
+.success-svg-icon {
+    display: block;
+}
+
+.success-title {
+    color: #153703; /* Verde escuro padrão dos títulos */
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 25px;
+    letter-spacing: -0.5px;
+}
+
+.success-subtitle {
+    color: #4a634d;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.success-message {
+    color: #4a634d;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 50px;
+}
+
+.success-message strong {
+    color: #153703;
+    font-weight: 800;
+}
+
+/* Container para os botões empilhados */
+.success-actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Botão Primário (Gmail) - Baseado no btn-pay do checkout */
+.btn-success-gmail {
+    background-color: #89b321; /* Verde limão da sua paleta */
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    padding: 18px 20px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.btn-success-gmail:hover {
+    background-color: #7cbf35;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(137, 179, 33, 0.3);
+}
+
+/* Botão Secundário (Home) - Discreto */
+.btn-success-home {
+    background-color: transparent;
+    color: #4a634d;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: underline; /* Dá aspecto de link menos importante */
+}
+
+.btn-success-home:hover {
+    color: #153703;
+    background-color: rgba(74, 99, 77, 0.05);
+}

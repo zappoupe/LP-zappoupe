@@ -1,0 +1,89 @@
+/* src/index.css */
+
+/* Reset Global de Margens e Padding para o Vite não bugar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita rolagem horizontal teimosa */
+    background-color: #f2f7e8; /* Cor de fundo principal */
+    font-family: 'Montserrat', sans-serif;
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+    display: block;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- O AJUSTE VISUAL: Cores de Seleção de Texto (padrão) --- */
+/* Quando o usuário seleciona um texto em um fundo CLARO (default), 
+   o realce fica Verde Escuro e a letra fica Branca. */
+::selection {
+    background-color: #143703; /* Verde mais escuro da paleta */
+    color: white; /* Garante que a letra branca apareça */
+}
+
+/* (Para navegadores baseados em Mozilla/Firefox) */
+::-moz-selection {
+    background-color: #143703;
+    color: white;
+}
+
+/* ✦ Scrollbar Premium — Zappoupe */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(
+    180deg,
+    #ddefc3 0%,
+    #c8e4a0 100%
+  );
+  border-radius: 100px;
+  box-shadow: inset 0 0 0 1px
+    #b5d480;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #7cbf35 0%,
+    #4d8c18 50%,
+    #2d6008 100%
+  );
+  border-radius: 100px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 -1px 0 rgba(0,0,0,.15);
+  transition: background .3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #8fd43e 0%,
+    #5aa01f 50%,
+    #1e4a04 100%
+  );
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    #5a8c28 #ddefc3;
+}

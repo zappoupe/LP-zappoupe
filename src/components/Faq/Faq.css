@@ -1,0 +1,241 @@
+/* src/components/Faq/Faq.css */
+
+/* --- ESTRUTURA PRINCIPAL --- */
+.faq-section {
+    width: 100vw;
+    min-height: 100vh;
+    background-color: #eaf1e3; 
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+    padding: 100px 20px 140px 20px; 
+}
+
+.faq-section::before,
+.faq-section::after {
+    content: "";
+    background-color: #153703;
+    height: 14px;
+    width: 100vw;
+    position: absolute;
+    left: 0;
+    z-index: 20;
+}
+.faq-section::before { top: 0; }
+.faq-section::after { bottom: 0; }
+
+.faq-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    z-index: 1;
+}
+
+.faq-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* --- CONTEÚDO CENTRAL (SPLIT LAYOUT) --- */
+.faq-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Alinha pelo topo pra ficar mais bonito quando as perguntas abrirem */
+    width: 100%;
+    max-width: 1200px;
+    gap: 60px;
+}
+
+/* --- LADO ESQUERDO: TEXTOS --- */
+.faq-left {
+    flex: 1;
+    max-width: 45%;
+    display: flex;
+    flex-direction: column;
+    position: sticky; /* Faz o título grudar na tela se a lista for muito longa */
+    top: 150px; 
+}
+
+.faq-title {
+    color: #153703;
+    font-size: 56px;
+    font-weight: 900;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    line-height: 1.1;
+    margin-bottom: 30px;
+}
+
+.faq-description {
+    color: #153703;
+    font-size: 20px; /* Diminuí um pouco pro título ganhar destaque */
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* --- LADO DIREITO: LISTA DE PERGUNTAS (ACCORDION) --- */
+.faq-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    max-width: 55%;
+}
+
+.faq-item {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background-color: rgba(21, 55, 3, 0.75); 
+    border-radius: 40px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 
+                0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Importante para o texto de dentro sumir ao fechar */
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.faq-item:hover {
+    background-color: rgba(33, 83, 6, 0.85); 
+    transform: translateX(-10px); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Cabeçalho do Card (Onde fica a pergunta e o ícone) */
+.faq-item-header {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    gap: 20px;
+    width: 100%;
+}
+
+.faq-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.faq-question {
+    color: #ecf6d8; 
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin: 0;
+    flex: 1; /* Ocupa todo o espaço restante */
+}
+
+/* O sinalzinho de + e - no canto */
+.faq-toggle-icon {
+    color: #bfd5a4;
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 0;
+    margin-left: auto;
+    transition: transform 0.4s ease, color 0.4s ease;
+}
+
+/* Quando o item tá aberto, o sinalzinho gira e fica branco */
+.faq-item.open .faq-toggle-icon {
+    transform: rotate(180deg);
+    color: #ffffff;
+}
+
+/* Corpo da Resposta (A mágica do fechar/abrir) */
+.faq-item-body {
+    max-height: 0; /* Começa com altura zero (fechado) */
+    opacity: 0;
+    padding: 0 30px 0 85px; /* Alinha o texto com a pergunta, pulando o ícone */
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.faq-answer {
+    color: #bfd5a4; /* Verde clarinho para diferenciar da pergunta */
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin: 0;
+    transform: translateY(-10px); /* Começa um pouco pra cima */
+    transition: transform 0.4s ease;
+}
+
+/* O estado ABERTO (Open) */
+.faq-item.open {
+    background-color: rgba(21, 55, 3, 0.95); /* Fica mais escuro e sólido */
+    transform: translateX(-10px); /* Mantém saltado para a esquerda */
+}
+
+.faq-item.open .faq-item-body {
+    max-height: 200px; /* Expande para caber a resposta */
+    opacity: 1;
+    padding-bottom: 25px; /* Dá um respiro embaixo da resposta */
+}
+
+.faq-item.open .faq-answer {
+    transform: translateY(0); /* O texto desce pro lugar certo */
+}
+
+
+/* --- ANIMAÇÕES EM CASCATA --- */
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card-anim-1 { opacity: 0; animation: slideUpFade 0.8s ease-out forwards; animation-delay: 0.1s; }
+.card-anim-2 { opacity: 0; animation: slideUpFade 0.8s ease-out forwards; animation-delay: 0.3s; }
+.card-anim-3 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 0.5s; }
+.card-anim-4 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 0.6s; }
+.card-anim-5 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 0.7s; }
+.card-anim-6 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 0.8s; }
+.card-anim-7 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 0.9s; }
+.card-anim-8 { opacity: 0; animation: slideUpFade 0.6s ease-out forwards; animation-delay: 1.0s; }
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 1024px) {
+    .faq-content {
+        flex-direction: column; 
+        gap: 40px;
+    }
+
+    .faq-left, .faq-right {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .faq-left {
+        position: static; /* Tira o "grude" no celular */
+    }
+
+    .faq-title {
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+
+    .faq-description {
+        font-size: 18px;
+    }
+
+    .faq-item {
+        text-align: left; 
+    }
+
+    .faq-item-body {
+        padding: 0 20px 0 20px; /* No celular, não precisa pular o ícone */
+    }
+
+    .faq-item:hover, .faq-item.open {
+        transform: translateY(-5px); /* Pula pra cima e não pro lado */
+    }
+}
