@@ -12,7 +12,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const stripePromise = loadStripe(stripePubKey);
 
 // --- COMPONENTE DO FORMULÁRIO DO STRIPE COM NOME, EMAIL E CELULAR ---
-const StripeForm = ({ clientSecret }: { clientSecret: string }) => {
+const StripeForm = () => {
     const stripe = useStripe();
     const elements = useElements();
     
@@ -268,7 +268,7 @@ export const Checkout = () => {
                         </div>
                     ) : (
                         <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                            <StripeForm clientSecret={clientSecret} />
+                            <StripeForm />
                         </Elements>
                     )}
                 </div>
