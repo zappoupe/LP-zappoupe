@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import './SetPassword.css';
 
@@ -9,7 +8,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const SetPassword = () => {
-    const navigate = useNavigate();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -43,9 +41,15 @@ export const SetPassword = () => {
             setMessage('Erro ao salvar senha: ' + error.message);
         } else {
             setIsSuccess(true);
-            // Depois de 3 segundos, joga o cara pra home ou pro Dashboard real do seu app
+            // Pega a sessão ativa para passar o token ao sistema externo
+            const { data: { session } } = await supabase.auth.getSession();
             setTimeout(() => {
-                navigate('/'); 
+                if (session?.access_token && session?.refresh_token) {
+                    // Redireciona já logado passando os tokens via hash (padrão Supabase)
+                    window.location.href = `https://sistema-do-usuario-production.up.railway.app/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=magiclink`;
+                } else {
+                    window.location.href = 'https://sistema-do-usuario-production.up.railway.app/';
+                }
             }, 3000);
         }
         

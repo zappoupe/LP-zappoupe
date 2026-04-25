@@ -92,7 +92,7 @@ export const FloatingNav = () => {
             </div>
 
             <div className="nav-login-area">
-                <div className="nav-login-btn">
+                <div className="nav-login-btn" onClick={() => window.location.href = 'https://sistema-do-usuario-production.up.railway.app/'} style={{ cursor: 'pointer' }}>
                     <img className="login-icon" alt="Login" src={IconLogin} />
                     <span className="login-text">LOGIN</span>
                 </div>
