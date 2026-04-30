@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './SetPassword.css';
 
@@ -13,13 +13,49 @@ export const SetPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
-
-    // Quando o usuário clica no link do e-mail, o Supabase passa um token na URL (#access_token)
-    // O supabase-js captura isso sozinho, então já teremos a sessão ativa.
     
+    // Novos estados para controlar a segurança da sessão
+    const [isCheckingSession, setIsCheckingSession] = useState(true);
+    const [hasSession, setHasSession] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const checkAuth = async () => {
+            // Verifica se já existe uma sessão engatilhada
+            const { data: { session } } = await supabase.auth.getSession();
+            if (isMounted) {
+                setHasSession(!!session);
+                // Damos um pequeno delay só para evitar um "piscar" na tela
+                setTimeout(() => setIsCheckingSession(false), 500);
+            }
+        };
+
+        // Fica ouvindo ativamente o Supabase processar a URL
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+            if (isMounted) {
+                setHasSession(!!session);
+                setIsCheckingSession(false);
+            }
+        });
+
+        checkAuth();
+
+        return () => {
+            isMounted = false;
+            authListener.subscription.unsubscribe();
+        };
+    }, []);
+
     const handleSetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         
+        // Trava de segurança extra
+        if (!hasSession) {
+            setMessage('Sessão inválida. O link expirou.');
+            return;
+        }
+
         if (password.length < 6) {
             setMessage('A senha deve ter pelo menos 6 caracteres.');
             return;
@@ -64,9 +100,18 @@ export const SetPassword = () => {
                     Defina uma senha segura para acessar sua conta no ZapPoupe.
                 </p>
 
-                {isSuccess ? (
+                {isCheckingSession ? (
+                    <p style={{ color: '#89b321', fontWeight: 'bold', margin: '30px 0' }}>
+                        Verificando seu link seguro...
+                    </p>
+                ) : !hasSession ? (
+                    <div style={{ backgroundColor: '#ffebee', padding: '20px', borderRadius: '12px', color: '#c62828', fontSize: '14px', lineHeight: '1.5' }}>
+                        <strong>O link é inválido ou expirou!</strong><br /><br />
+                        Por segurança, os links de acesso só podem ser usados uma vez.<br /> Volte ao aplicativo e solicite um novo acesso.
+                    </div>
+                ) : isSuccess ? (
                     <div className="password-success-msg">
-                        🎉 Senha criada com sucesso!<br/> Redirecionando...
+                        Senha criada com sucesso!<br/> Redirecionando...
                     </div>
                 ) : (
                     <form className="set-password-form" onSubmit={handleSetPassword}>
@@ -94,7 +139,7 @@ export const SetPassword = () => {
                             />
                         </div>
 
-                        {message && <p style={{ color: 'red', fontSize: '13px', margin: 0 }}>{message}</p>}
+                        {message && <p style={{ color: '#c62828', fontSize: '13px', margin: 0, fontWeight: 'bold' }}>{message}</p>}
 
                         <button type="submit" className="btn-save-password" disabled={isLoading}>
                             {isLoading ? 'SALVANDO...' : 'SALVAR SENHA'}
