@@ -18,6 +18,12 @@ export const SetPassword = () => {
     const [isCheckingSession, setIsCheckingSession] = useState(true);
     const [hasSession, setHasSession] = useState(false);
 
+    // Estados do fluxo de reenvio de link (quando o convite expira)
+    const [resendEmail, setResendEmail] = useState('');
+    const [isResending, setIsResending] = useState(false);
+    const [resendMessage, setResendMessage] = useState('');
+    const [resendSuccess, setResendSuccess] = useState(false);
+
     useEffect(() => {
         let isMounted = true;
 
@@ -46,6 +52,32 @@ export const SetPassword = () => {
             authListener.subscription.unsubscribe();
         };
     }, []);
+
+    const handleResendInvite = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const email = resendEmail.trim().toLowerCase();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setResendMessage('Digite um e-mail válido.');
+            return;
+        }
+
+        setIsResending(true);
+        setResendMessage('');
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname,
+        });
+
+        if (error) {
+            setResendMessage('Não foi possível reenviar: ' + error.message);
+        } else {
+            setResendSuccess(true);
+            setResendMessage('Um novo link foi enviado para o seu e-mail. Verifique a caixa de entrada e o spam.');
+        }
+
+        setIsResending(false);
+    };
 
     const handleSetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,10 +137,42 @@ export const SetPassword = () => {
                         Verificando seu link seguro...
                     </p>
                 ) : !hasSession ? (
-                    <div style={{ backgroundColor: '#ffebee', padding: '20px', borderRadius: '12px', color: '#c62828', fontSize: '14px', lineHeight: '1.5' }}>
-                        <strong>O link é inválido ou expirou!</strong><br /><br />
-                        Por segurança, os links de acesso só podem ser usados uma vez.<br /> Volte ao aplicativo e solicite um novo acesso.
-                    </div>
+                    <>
+                        <div style={{ backgroundColor: '#ffebee', padding: '20px', borderRadius: '12px', color: '#c62828', fontSize: '14px', lineHeight: '1.5', textAlign: 'left' }}>
+                            <strong>O link é inválido ou expirou!</strong><br /><br />
+                            Por segurança, os links de acesso só podem ser usados uma vez. Informe seu e-mail abaixo para receber um novo link de acesso.
+                        </div>
+
+                        {resendSuccess ? (
+                            <div className="password-success-msg">
+                                {resendMessage}
+                            </div>
+                        ) : (
+                            <form className="set-password-form" onSubmit={handleResendInvite} style={{ marginTop: '20px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#4a634d' }}>Seu e-mail</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        className="set-password-input"
+                                        value={resendEmail}
+                                        onChange={(e) => setResendEmail(e.target.value)}
+                                        placeholder="seuemail@exemplo.com"
+                                    />
+                                </div>
+
+                                {resendMessage && (
+                                    <p style={{ color: '#c62828', fontSize: '13px', margin: 0, fontWeight: 'bold' }}>
+                                        {resendMessage}
+                                    </p>
+                                )}
+
+                                <button type="submit" className="btn-save-password" disabled={isResending}>
+                                    {isResending ? 'ENVIANDO...' : 'REENVIAR LINK'}
+                                </button>
+                            </form>
+                        )}
+                    </>
                 ) : isSuccess ? (
                     <div className="password-success-msg">
                         Senha criada com sucesso!<br/> Redirecionando...
