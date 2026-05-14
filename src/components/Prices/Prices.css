@@ -336,3 +336,26 @@
     color: #153703;
     width: 20px;
 }
+
+/* --- BADGE DE TRIAL (30 DIAS GRÁTIS) --- */
+.trial-badge {
+    background-color: #153703;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(21, 55, 3, 0.25);
+    text-transform: uppercase;
+}
+
+.trial-disclaimer {
+    font-size: 11px;
+    color: #4a634d;
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+    font-weight: 600;
+}

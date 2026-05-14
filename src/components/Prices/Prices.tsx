@@ -53,9 +53,10 @@ export const Prices = () => {
                     
                     {/* --- CARD 1: INDIVIDUAL --- */}
                     <div className="price-card card-anim-2">
+                        <div className="trial-badge">30 DIAS GRÁTIS</div>
                         <img className="card-illustration" alt="Plano Individual" src={ImgIndividual} />
                         <h3 className="card-subtitle">PLANO INDIVIDUAL - CRESCIMENTO PESSOAL</h3>
-                        
+
                         <div className="price-block">
                             <span className="currency">R$</span>
                             <span className="amount">
@@ -73,15 +74,17 @@ export const Prices = () => {
                         </ul>
                         
                         <button className="btn-subscribe" onClick={() => handleSubscribe('individual')}>
-                            ASSINAR INDIVIDUAL
+                            COMEÇAR 30 DIAS GRÁTIS
                         </button>
+                        <p className="trial-disclaimer">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>
 
                     {/* --- CARD 2: FAMÍLIA --- */}
                     <div className="price-card card-anim-3">
+                        <div className="trial-badge">30 DIAS GRÁTIS</div>
                         <img className="card-illustration" alt="Plano Família" src={ImgFamily} />
                         <h3 className="card-subtitle">PLANO FAMÍLIA - PROSPERIDADE CONJUNTA</h3>
-                        
+
                         <div className="price-block">
                             <span className="currency">R$</span>
                             <span className="amount">
@@ -110,8 +113,9 @@ export const Prices = () => {
                         </div>
                         
                         <button className="btn-subscribe" onClick={() => handleSubscribe('family')}>
-                            ASSINAR FAMÍLIA
+                            COMEÇAR 30 DIAS GRÁTIS
                         </button>
+                        <p className="trial-disclaimer">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>
 
                 </div>
