@@ -26,49 +26,49 @@ const SophisticatedCheckIcon = () => (
 export const Success = () => {
     const navigate = useNavigate();
 
-    // Atalho para abrir o Gmail
-    const handleOpenGmail = () => {
-        window.open('https://mail.google.com/', '_blank');
+    // Leva direto pro login do sistema
+    const handleAcessarConta = () => {
+        window.location.href = 'https://sistema-do-usuario-production.up.railway.app/';
     };
 
     return (
         <section className="success-section">
             <div className="success-card">
-                
+
                 <div className="success-icon-container">
                     <SophisticatedCheckIcon />
                 </div>
-                
+
                 <h1 className="success-title">PAGAMENTO CONFIRMADO</h1>
-                
+
                 <p className="success-subtitle">
                     Tudo pronto! Sua assinatura do ZapPoupe<br/> foi ativada com sucesso.
                 </p>
-                
+
                 <p className="success-message">
-                    <strong>Enviamos um e-mail para você agora.</strong><br/>
-                    Acesse o link no e-mail para criar sua senha<br/>
-                    e iniciar sua jornada financeira.
+                    <strong>Sua conta já está criada!</strong><br/>
+                    Entre com o e-mail e a senha que você<br/>
+                    acabou de cadastrar para começar.
                 </p>
-                
+
                 <div className="success-actions-container">
-                    {/* Botão Primário de Atalho */}
-                    <button 
+                    {/* Botão Primário — acessar a conta */}
+                    <button
                         className="btn-success-gmail"
-                        onClick={handleOpenGmail}
+                        onClick={handleAcessarConta}
                     >
-                        ABRIR MEU GMAIL
+                        ACESSAR MINHA CONTA
                     </button>
-                    
+
                     {/* Botão Secundário de Retorno */}
-                    <button 
+                    <button
                         className="btn-success-home"
                         onClick={() => navigate('/')}
                     >
                         Voltar para o Início
                     </button>
                 </div>
-                
+
             </div>
         </section>
     );

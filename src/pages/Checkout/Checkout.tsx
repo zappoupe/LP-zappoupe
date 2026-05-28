@@ -79,6 +79,8 @@ export const Checkout = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     // Estado da sessão Stripe (estágio 2)
     const [clientSecret, setClientSecret] = useState<string>('');
@@ -146,6 +148,16 @@ export const Checkout = () => {
             return;
         }
 
+        if (password.length < 6) {
+            setSessionError('A senha deve ter pelo menos 6 caracteres.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setSessionError('As senhas não coincidem.');
+            return;
+        }
+
         if (!supabaseFunctionsUrl) {
             setSessionError('Configuração inválida. Tente novamente em alguns minutos.');
             return;
@@ -168,6 +180,7 @@ export const Checkout = () => {
                     email: email.trim().toLowerCase(),
                     name: name.trim(),
                     phone: phone.trim(),
+                    password,
                 }),
             });
 
@@ -277,6 +290,32 @@ export const Checkout = () => {
                                     value={phone}
                                     onChange={handlePhoneChange}
                                     placeholder="(11) 99999-9999"
+                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Crie sua Senha *</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Mínimo 6 caracteres"
+                                    autoComplete="new-password"
+                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Confirme sua Senha *</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Repita a senha"
+                                    autoComplete="new-password"
                                     style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
                                 />
                             </div>
