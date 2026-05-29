@@ -1,80 +1,113 @@
 // src/components/Features/Features.tsx
-import ImgBackground from "../../assets/bg-features.png"; 
-import ImgIcon1 from "../../assets/message.svg"; 
-import ImgIcon2 from "../../assets/voice.svg"; 
-import ImgIcon3 from "../../assets/post.svg"; 
-import ImgIcon4 from "../../assets/circle.svg"; 
-import ImgIcon5 from "../../assets/money.svg"; 
+import { useState, useEffect, useRef } from "react";
 import "./Features.css";
 
+const ArrowUpRight = () => (
+    <svg className="bento-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+interface Feature {
+    label: string;
+    title: string;
+    desc: string;
+    tags?: string[];
+}
+
+const FEATURES: Feature[] = [
+    {
+        label: "EM DESTAQUE",
+        title: "Adicione seus gastos com apenas uma mensagem",
+        desc: 'Basta mandar algo como "mercado 120 reais" e o ZapPoupe atualiza tudo sozinho — saldo, categorias e histórico direto no seu WhatsApp.',
+        tags: ["WhatsApp", "Texto, áudio ou foto", "Automático"],
+    },
+    {
+        label: "REGISTRO",
+        title: "Grave um áudio ou envie uma foto",
+        desc: "Não quer digitar? Manda um áudio ou foto do comprovante. O ZapPoupe entende tudo e registra automaticamente. Você fala, ele organiza.",
+    },
+    {
+        label: "LEMBRETES",
+        title: "Lembretes que salvam o seu mês",
+        desc: "Nunca mais esqueça de pagar uma conta. O assistente te avisa antes do vencimento e ainda ajuda a organizar os valores.",
+    },
+    {
+        label: "INTELIGÊNCIA",
+        title: "Categorias inteligentes e automáticas",
+        desc: "Mercado, transporte, lazer ou boletos: o ZapPoupe reconhece e organiza tudo sozinho, sem você precisar ajustar nada.",
+    },
+    {
+        label: "VISÃO GERAL",
+        title: "Controle total do seu dinheiro",
+        desc: "Veja como está gastando e onde dá pra economizar. Gráficos claros e categorias organizadas mostram sua saúde financeira real — menos surpresas no fim do mês.",
+    },
+];
+
 export const Features = () => {
+    const [visible, setVisible] = useState(false);
+    const sectionRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const el = sectionRef.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) {
+                    setVisible(true);
+                    obs.disconnect();
+                }
+            },
+            { threshold: 0.12 },
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
     return (
-        <section className="features-section">
-            <div className="features-background">
-                <img src={ImgBackground} alt="Fundo orgânico" />
-            </div>
+        <section ref={sectionRef} id="features-section" className={`features-section ${visible ? "is-visible" : ""}`}>
+            <div className="features-grid-lines" aria-hidden="true" />
 
-            <div className="FEATURES">
-
-                <h2 className="text-wrapper-title">CONHEÇA ALGUNS RECURSOS DO ZAPPOUPE:</h2>
-
-                {/* --- OS 5 CARDS DE RECURSOS --- */}
-                
-                {/* Card 1: Mensagem */}
-                <div className="features-card card-1 card-anim has-reveal">
-                    <div className="card-front">
-                        <img className="card-icon" alt="Icon" src={ImgIcon1} />
-                    </div>
-                    <div className="card-reveal">
-                        <h3>Adicione seus gastos com apenas uma mensagem</h3>
-                        <p>Basta mandar uma mensagem como "mercado 120 reais" e o ZapPoupe atualiza tudo sozinho, com saldo, categorias e histórico direto no seu WhatsApp.</p>
-                    </div>
+            <div className="features-inner">
+                <div className="features-head">
+                    <span className="features-eyebrow">
+                        <span className="features-eyebrow-dot" />
+                        01 — RECURSOS
+                    </span>
+                    <h2 className="features-title">
+                        Conheça alguns recursos do <em>ZapPoupe</em>
+                    </h2>
                 </div>
 
-                {/* Card 2: Áudio e Foto */}
-                <div className="features-card card-2 card-anim has-reveal">
-                    <div className="card-front">
-                        <img className="card-icon" alt="Icon" src={ImgIcon2} />
-                    </div>
-                    <div className="card-reveal">
-                        <h3>Grave um áudio ou envie uma foto</h3>
-                        <p>Não quer digitar? É só mandar um áudio ou foto do comprovante. O ZapPoupe entende tudo e registra automaticamente. Você fala, ele organiza.</p>
-                    </div>
-                </div>
+                <div className="bento">
+                    {FEATURES.map((f, i) => (
+                        <article
+                            className={`bento-card ${i === 0 ? "bento-card--featured" : ""}`}
+                            key={i}
+                            style={{ transitionDelay: `${0.1 + i * 0.09}s` }}
+                        >
+                            <div className="bento-top">
+                                <span className="bento-label">
+                                    {String(i + 1).padStart(2, "0")} — {f.label}
+                                </span>
+                                <ArrowUpRight />
+                            </div>
 
-                {/* Card 3: Lembretes */}
-                <div className="features-card card-3 card-anim has-reveal">
-                    <div className="card-front">
-                        <img className="card-icon" alt="Icon" src={ImgIcon3} />
-                    </div>
-                    <div className="card-reveal">
-                        <h3>Lembretes que salvam o seu mês</h3>
-                        <p>Nunca mais se esqueça de pagar uma conta. O assistente te avisa antes do vencimento e ainda ajuda a organizar os valores.</p>
-                    </div>
-                </div>
+                            <div className="bento-body">
+                                <h3 className="bento-title">{f.title}</h3>
+                                <p className="bento-desc">{f.desc}</p>
 
-                {/* Card 4: Categorias Inteligentes */}
-                <div className="features-card card-4 card-anim has-reveal">
-                    <div className="card-front">
-                        <img className="card-icon" alt="Icon" src={ImgIcon4} />
-                    </div>
-                    <div className="card-reveal">
-                        <h3>Categorias inteligentes e automáticas</h3>
-                        <p>O ZapPoupe reconhece automaticamente seus gastos e organiza tudo sem você precisar ajustar nada. Gastos com mercado, transporte, lazer ou boletos são reconhecidos automaticamente.</p>
-                    </div>
+                                {f.tags && (
+                                    <div className="bento-tags">
+                                        {f.tags.map((t) => (
+                                            <span className="bento-tag" key={t}>{t}</span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </article>
+                    ))}
                 </div>
-
-                {/* Card 5: Controle Total */}
-                <div className="features-card card-5 card-anim has-reveal">
-                    <div className="card-front">
-                        <img className="card-icon" alt="Icon" src={ImgIcon5} />
-                    </div>
-                    <div className="card-reveal">
-                        <h3>Controle total do seu dinheiro</h3>
-                        <p>Veja exatamente como está gastando e onde pode economizar. Gráficos claros e categorias organizadas mostram um panorama real da sua saúde financeira. Mais clareza, mais controle e menos surpresas no fim do mês.</p>
-                    </div>
-                </div>
-
             </div>
         </section>
     );

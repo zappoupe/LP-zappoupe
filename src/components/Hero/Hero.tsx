@@ -1,10 +1,11 @@
 // src/components/Hero/Hero.tsx
-import ImgBackground from "../../assets/bg-hero.png"; 
 import ImgMoca from "../../assets/Objeto.png";
+import IconVoice from "../../assets/voice.svg";
+import IconMessage from "../../assets/message.svg";
+import IconMobile from "../../assets/mobile.svg";
 import "./Hero.css";
 
 export const Hero = () => {
-    // Função para rolar até a seção de preços
     const scrollToPrices = () => {
         const element = document.getElementById('prices-section');
         if (element) {
@@ -14,34 +15,60 @@ export const Hero = () => {
 
     return (
         <section className="hero-section">
-            <div className="hero-background">
-                <img src={ImgBackground} alt="Fundo orgânico" />
-            </div>
+            {/* Blobs orgânicos de fundo */}
+            <div className="hero-blob hero-blob--1" aria-hidden="true" />
+            <div className="hero-blob hero-blob--2" aria-hidden="true" />
 
-            <div className="HERO">
-                {/* Adicionamos o onClick aqui! */}
-                <div className="frame" onClick={scrollToPrices}>
-                    <div className="text-wrapper">COMEÇAR MEU CONTROLE AGORA</div>
+            <div className="hero-inner">
+                {/* ── COLUNA DE TEXTO ── */}
+                <div className="hero-copy">
+                    <span className="hero-badge">
+                        <span className="hero-badge-dot" />
+                        VOCÊ FALA, O ZAPPOUPE ENTENDE.
+                    </span>
+
+                    <h1 className="hero-title">
+                        <span className="hero-title-lead">SUA GRANA</span>
+                        FINALMENTE<br />SE ORGANIZA.
+                    </h1>
+
+                    <p className="hero-sub">
+                        Se o dinheiro sempre some, o ZapPoupe te mostra o caminho de volta ao controle.
+                    </p>
+
+                    <div className="hero-actions">
+                        <button className="hero-cta" onClick={scrollToPrices}>
+                            COMEÇAR MEU CONTROLE AGORA
+                        </button>
+                        <span className="hero-trust">
+                            ✓ 30 dias grátis · cancele quando quiser
+                        </span>
+                    </div>
+
+                    {/* Chips dos modos de registro */}
+                    <div className="hero-modes">
+                        <span className="hero-mode"><img src={IconVoice} alt="" /> Áudio</span>
+                        <span className="hero-mode"><img src={IconMessage} alt="" /> Texto</span>
+                        <span className="hero-mode"><img src={IconMobile} alt="" /> Foto</span>
+                    </div>
                 </div>
 
-                <div className="div">
-                    <div className="frame-wrapper">
-                        <div className="frame-2">
-                            <p className="p">VOCÊ FALA, O ZAPPOUPE ENTENDE.</p>
-                            <div className="text-wrapper-2">FINALMENTE <br/> SE ORGANIZA.</div>
-                            <div className="text-wrapper-3">SUA GRANA</div>
-                        </div>
+                {/* ── COLUNA VISUAL ── */}
+                <div className="hero-visual">
+                    <div className="hero-visual-glow" aria-hidden="true" />
+                    <img className="hero-img" alt="Pessoa usando o ZapPoupe" src={ImgMoca} />
+
+                    {/* Bubble do usuário */}
+                    <div className="hero-chat hero-chat--user">
+                        Gastei 50 no mercado 🛒
                     </div>
-                    <div className="div-wrapper">
-                        <div className="frame-3">
-                            <p className="text-wrapper-4">
-                                Se o dinheiro sempre some, o ZapPoupe te mostra o caminho de volta ao controle.
-                            </p>
-                        </div>
+
+                    {/* Bubble do bot */}
+                    <div className="hero-chat hero-chat--bot">
+                        <span className="hero-chat-check">✓</span>
+                        Despesa registrada! Categoria: Alimentação
                     </div>
                 </div>
-
-                <img className="objeto" alt="Objeto" src={ImgMoca} />
             </div>
         </section>
     );

@@ -13,6 +13,19 @@ const stripePromise = loadStripe(stripePubKey);
 
 type PaymentMode = 'setup' | 'payment';
 
+const Check = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+const LockIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="4" y="10" width="16" height="11" rx="2.5" stroke="currentColor" strokeWidth="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
+
 interface StripeFormProps {
     name: string;
     email: string;
@@ -20,7 +33,6 @@ interface StripeFormProps {
     mode: PaymentMode;
 }
 
-// Confirma o cartão. Em trial usa confirmSetup (só guarda); senão confirmPayment (cobra).
 const StripeForm = ({ name, email, phone, mode }: StripeFormProps) => {
     const stripe = useStripe();
     const elements = useElements();
@@ -50,16 +62,10 @@ const StripeForm = ({ name, email, phone, mode }: StripeFormProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <form onSubmit={handleSubmit} className="co-form">
             <PaymentElement />
-
-            <button
-                type="submit"
-                className="btn-pay"
-                disabled={isLoading || !stripe || !elements}
-                style={{ marginTop: '20px' }}
-            >
-                {isLoading ? 'A PROCESSAR...' : 'INICIAR 30 DIAS GRÁTIS'}
+            <button type="submit" className="co-submit" disabled={isLoading || !stripe || !elements}>
+                {isLoading ? 'PROCESSANDO...' : 'INICIAR 30 DIAS GRÁTIS'}
             </button>
         </form>
     );
@@ -75,20 +81,17 @@ export const Checkout = () => {
     const [isAnnual, setIsAnnual] = useState(initialData.isAnnual);
     const [extraMembers, setExtraMembers] = useState(initialData.extraMembers);
 
-    // Dados do cliente (estágio 1)
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    // Estado da sessão Stripe (estágio 2)
     const [clientSecret, setClientSecret] = useState<string>('');
     const [mode, setMode] = useState<PaymentMode>('setup');
     const [isCreatingSession, setIsCreatingSession] = useState(false);
     const [sessionError, setSessionError] = useState('');
 
-    // Valores Base Atualizados
     const prices = {
         individual: { annual: 197.90, monthly: 39.90 },
         family: { annual: 397.90, monthly: 59.90 },
@@ -104,15 +107,14 @@ export const Checkout = () => {
         : 0;
 
     const finalPrice = basePrice + extraCost;
-    const periodText = isAnnual ? '/ANO' : '/MÊS';
+    const periodText = isAnnual ? '/ano' : '/mês';
 
-    const title = planType === 'individual'
-        ? "PLANO INDIVIDUAL - CRESCIMENTO PESSOAL"
-        : "PLANO FAMÍLIA - PROSPERIDADE CONJUNTA";
+    const planName = planType === 'individual' ? 'Individual' : 'Família';
+    const planTagline = planType === 'individual' ? 'Crescimento pessoal' : 'Prosperidade conjunta';
 
     const benefits = planType === 'individual'
         ? [
-            "Registo de gastos por áudio, texto ou foto",
+            "Registro de gastos por áudio, texto ou foto",
             "Categorização 100% automática pela IA",
             "Lembretes de vencimento de contas",
             "Gráficos de saúde financeira no WhatsApp"
@@ -120,7 +122,7 @@ export const Checkout = () => {
         : [
             "Tudo do plano individual",
             "Até 3 membros incluídos (+ membros extras)",
-            "Controlos familiares e individuais",
+            "Controles familiares e individuais",
             "Categorização e relatórios familiares"
         ];
 
@@ -142,22 +144,18 @@ export const Checkout = () => {
             setSessionError('Preencha nome, e-mail e celular antes de continuar.');
             return;
         }
-
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
             setSessionError('E-mail inválido.');
             return;
         }
-
         if (password.length < 6) {
             setSessionError('A senha deve ter pelo menos 6 caracteres.');
             return;
         }
-
         if (password !== confirmPassword) {
             setSessionError('As senhas não coincidem.');
             return;
         }
-
         if (!supabaseFunctionsUrl) {
             setSessionError('Configuração inválida. Tente novamente em alguns minutos.');
             return;
@@ -199,141 +197,117 @@ export const Checkout = () => {
         }
     };
 
+    const fmt = (v: number) => v.toFixed(2).replace('.', ',');
+
     return (
         <section className="checkout-section">
-            <div className="checkout-container">
-                <div className="checkout-summary">
-                    <button className="btn-back" onClick={() => navigate('/')}>
-                        ← Voltar para o início
-                    </button>
+            <div className="checkout-card">
 
-                    <h2 className="summary-title">Resumo do Pedido</h2>
-                    <h3 className="plan-name">{title}</h3>
+                {/* ── RESUMO (esquerda) ── */}
+                <aside className="co-summary">
+                    <div className="co-summary-glow" aria-hidden="true" />
 
-                    <div className="trial-highlight">
-                        <span className="trial-highlight-badge">30 DIAS GRÁTIS</span>
-                        <p>Você não será cobrado hoje. A primeira cobrança acontece apenas após os 30 dias de teste e você pode cancelar a qualquer momento.</p>
+                    <button className="co-back" onClick={() => navigate('/')}>← Voltar para o início</button>
+
+                    <span className="co-summary-eyebrow">RESUMO DO PEDIDO</span>
+                    <div className="co-plan">
+                        <h2>{planName}</h2>
+                        <p>{planTagline}</p>
                     </div>
 
-                    <div className="checkout-billing-toggle">
+                    <div className="co-trial">
+                        <span className="co-trial-badge">✨ 30 DIAS GRÁTIS</span>
+                        <p>Você não será cobrado hoje. A primeira cobrança acontece apenas após os 30 dias de teste — cancele quando quiser.</p>
+                    </div>
+
+                    <div className="co-toggle">
                         <span className={!isAnnual ? "active" : ""}>Mensal</span>
-                        <div className="checkout-toggle-switch" onClick={() => !clientSecret && setIsAnnual(!isAnnual)}>
-                            <div className={`checkout-toggle-knob ${isAnnual ? "annual" : "monthly"}`}></div>
-                        </div>
+                        <button
+                            className="co-toggle-switch"
+                            onClick={() => !clientSecret && setIsAnnual(!isAnnual)}
+                            aria-label="Alternar mensal/anual"
+                        >
+                            <span className={`co-toggle-knob ${isAnnual ? "annual" : "monthly"}`} />
+                        </button>
                         <span className={isAnnual ? "active" : ""}>Anual</span>
                     </div>
 
-                    <div className="plan-price">
-                        R$ {finalPrice.toFixed(2).replace('.', ',')} <span>{periodText}</span>
+                    <div className="co-price">
+                        <span className="co-price-currency">R$</span>
+                        <span className="co-price-amount">{fmt(finalPrice)}</span>
+                        <span className="co-price-period">{periodText}</span>
                     </div>
 
                     {planType === 'family' && (
-                        <div className="checkout-member-control">
-                            <p>
-                                <strong>Membros Extras</strong> <br />
-                                (+ R$ {isAnnual ? prices.extraMember.annual.toFixed(2).replace('.', ',') : prices.extraMember.monthly.toFixed(2).replace('.', ',')}{periodText} por pessoa)
-                            </p>
-                            <div className="checkout-member-counter">
-                                <button onClick={() => !clientSecret && setExtraMembers(Math.max(0, extraMembers - 1))}>-</button>
+                        <div className="co-members">
+                            <div className="co-members-info">
+                                <strong>Membros extras</strong>
+                                <span>+ R$ {isAnnual ? fmt(prices.extraMember.annual) : fmt(prices.extraMember.monthly)} {periodText} por pessoa</span>
+                            </div>
+                            <div className="co-members-counter">
+                                <button onClick={() => !clientSecret && setExtraMembers(Math.max(0, extraMembers - 1))} aria-label="Remover">−</button>
                                 <span>{extraMembers}</span>
-                                <button onClick={() => !clientSecret && setExtraMembers(extraMembers + 1)}>+</button>
+                                <button onClick={() => !clientSecret && setExtraMembers(extraMembers + 1)} aria-label="Adicionar">+</button>
                             </div>
                         </div>
                     )}
 
-                    <ul className="benefits-list">
-                        {benefits.map((benefit: string, idx: number) => (
-                            <li key={idx}>{benefit}</li>
+                    <ul className="co-benefits">
+                        {benefits.map((b, i) => (
+                            <li key={i}><span className="co-benefit-check"><Check /></span>{b}</li>
                         ))}
                     </ul>
-                </div>
+                </aside>
 
-                <div className="checkout-form-container">
-                    <h2 className="checkout-title">Pagamento Seguro</h2>
-                    <p className="checkout-subtitle">
-                        {clientSecret
-                            ? 'Adicione os dados do cartão para iniciar seus 30 dias grátis.'
-                            : 'Preencha seus dados para iniciar sua assinatura.'}
-                    </p>
+                {/* ── FORM (direita) ── */}
+                <div className="co-form-wrap">
+                    <div className="co-form-head">
+                        <h1>
+                            <span className="co-lock"><LockIcon /></span>
+                            Pagamento Seguro
+                        </h1>
+                        <p>
+                            {clientSecret
+                                ? 'Adicione os dados do cartão para iniciar seus 30 dias grátis.'
+                                : 'Preencha seus dados para iniciar sua assinatura.'}
+                        </p>
+                    </div>
 
                     {!clientSecret ? (
-                        <form onSubmit={handleContinue} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Nome Completo *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="João da Silva"
-                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
-                                />
+                        <form onSubmit={handleContinue} className="co-form">
+                            <div className="co-field">
+                                <label>Nome completo *</label>
+                                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="João da Silva" />
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>E-mail de Acesso *</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="seu@email.com"
-                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
-                                />
+                            <div className="co-field">
+                                <label>E-mail de acesso *</label>
+                                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Celular (WhatsApp) *</label>
-                                <input
-                                    type="tel"
-                                    required
-                                    value={phone}
-                                    onChange={handlePhoneChange}
-                                    placeholder="(11) 99999-9999"
-                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
-                                />
+                            <div className="co-field">
+                                <label>Celular (WhatsApp) *</label>
+                                <input type="tel" required value={phone} onChange={handlePhoneChange} placeholder="(11) 99999-9999" />
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Crie sua Senha *</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Mínimo 6 caracteres"
-                                    autoComplete="new-password"
-                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
-                                />
+                            <div className="co-field-row">
+                                <div className="co-field">
+                                    <label>Crie sua senha *</label>
+                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
+                                </div>
+                                <div className="co-field">
+                                    <label>Confirme sua senha *</label>
+                                    <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" autoComplete="new-password" />
+                                </div>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#4a634d' }}>Confirme sua Senha *</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Repita a senha"
-                                    autoComplete="new-password"
-                                    style={{ padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
-                                />
-                            </div>
+                            {sessionError && <p className="co-error">{sessionError}</p>}
 
-                            {sessionError && (
-                                <p style={{ color: '#c62828', fontSize: '13px', margin: 0, fontWeight: 'bold' }}>
-                                    {sessionError}
-                                </p>
-                            )}
-
-                            <button
-                                type="submit"
-                                className="btn-pay"
-                                disabled={isCreatingSession}
-                                style={{ marginTop: '10px' }}
-                            >
-                                {isCreatingSession ? 'A PREPARAR...' : 'CONTINUAR PARA O PAGAMENTO'}
+                            <button type="submit" className="co-submit" disabled={isCreatingSession}>
+                                {isCreatingSession ? 'PREPARANDO...' : 'CONTINUAR PARA O PAGAMENTO'}
                             </button>
+
+                            <p className="co-secure-note"><LockIcon /> Seus dados são protegidos e o pagamento é processado pela Stripe.</p>
                         </form>
                     ) : (
                         <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>

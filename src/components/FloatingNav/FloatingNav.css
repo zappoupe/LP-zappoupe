@@ -1,283 +1,193 @@
 /* src/components/FloatingNav/FloatingNav.css */
 
-.floating-nav-container {
-    background-color: #f2f7e8;
-    border: 1px solid #2e4523;
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    height: 62px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    
-    /* Posição Fixa e Centralizada */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@0,500;0,600;0,700;0,800;0,900&display=swap');
+
+.nav {
     position: fixed;
-    bottom: 40px; 
-    left: 50%;
-    
-    /* Estado inicial */
-    opacity: 0;
-    transform: translate(-50%, 50px);
-    pointer-events: none;
-    
-    /* ANIMAÇÃO PRINCIPAL */
-    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1),
-                opacity 0.4s ease, 
-                transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-                border-color 0.4s ease,
-                box-shadow 0.4s ease,
-                padding 0.6s ease;
-    z-index: 9999; 
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 9999;
     font-family: 'Montserrat', sans-serif;
-    overflow: hidden; 
+    transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+}
+.nav--scrolled {
+    background: rgba(242, 247, 232, 0.82);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    backdrop-filter: saturate(160%) blur(14px);
+    border-bottom-color: rgba(53, 88, 36, 0.12);
+    box-shadow: 0 6px 24px rgba(20, 55, 3, 0.08);
 }
 
-/* --- ESTADO 1: VISÍVEL E COMPLETO --- */
-.floating-nav-container.visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
-    pointer-events: auto;
-    width: 792px; 
-    padding: 0; 
-}
-
-/* --- ESTADO 2: COLAPSADO --- */
-.floating-nav-container.collapsed {
-    width: 330px; 
-    justify-content: space-between; 
-    padding: 0 12px; 
-    border-color: #153703; 
-    box-shadow: 0 10px 25px rgba(21, 55, 3, 0.15);
-}
-
-/* --- CONTEÚDO DA NAVBAR --- */
-.nav-logo {
-    height: 44px;
-    margin-left: 11px;
-    width: 46px;
-    user-select: none;
-    pointer-events: none;
-    flex-shrink: 0; 
-    transition: margin 0.6s ease;
-}
-
-.floating-nav-container.collapsed .nav-logo {
-    margin-left: 0;
-}
-
-/* Contêiner de links e ícones */
-.nav-content {
+.nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 72px;
+    padding: 0 24px;
     display: flex;
-    gap: 27px;
-    height: 100%;
-    margin-left: 140px; 
     align-items: center;
-    transition: margin 0.6s cubic-bezier(0.25, 1, 0.5, 1), gap 0.6s ease;
+    justify-content: space-between;
+    gap: 20px;
 }
+.nav--scrolled .nav-inner { height: 64px; }
 
-.floating-nav-container.collapsed .nav-content {
-    margin: 0;
-    gap: 12px; 
-}
-
-/* Item de Navegação (Ícone + Texto) */
-.nav-item {
-    display: flex;
+/* --- MARCA --- */
+.nav-brand {
+    display: inline-flex;
     align-items: center;
     gap: 10px;
+    background: none;
+    border: none;
     cursor: pointer;
-    position: relative;
-    color: #2e4523;
-    transition: all 0.4s ease;
-}
-
-.nav-item:hover {
-    color: #607655;
-}
-
-/* Ícones (Escondidos por padrão no estado completo) */
-.nav-icon {
-    width: 0; 
-    height: 20px;
-    opacity: 0;
-    transform: scale(0.5);
-    transition: opacity 0.4s ease, transform 0.4s ease, width 0.4s ease;
-}
-
-/* Textos (Visíveis por padrão) */
-.nav-text {
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap; 
-    transition: opacity 0.4s ease, width 0.4s ease;
-    opacity: 1;
-}
-
-/* --- ESTILOS EXCLUSIVOS DO ESTADO COLAPSADO --- */
-
-.floating-nav-container.collapsed .nav-text {
-    opacity: 0;
-    width: 0; 
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.floating-nav-container.collapsed .nav-item {
-    background-color: #a5ca92;
-    border: 1px solid #153703;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    justify-content: center;
-}
-
-.floating-nav-container.collapsed .nav-item:hover {
-    background-color: #bfd5a4;
-}
-
-.floating-nav-container.collapsed .nav-icon {
-    opacity: 1;
-    transform: scale(1);
-    width: 20px; 
-    margin-right: 0; 
-}
-
-/* --- ÁREA E BOTÃO DE LOGIN --- */
-.nav-login-area {
-    margin-left: auto;
-    margin-right: 11px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    height: 100%;
-    transition: margin 0.6s ease;
-}
-
-.floating-nav-container.collapsed .nav-login-area {
-    margin: 0;
-}
-
-.nav-login-btn {
-    background-color: #607655;
-    border: 1px solid #1e1e1e;
-    border-radius: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    
-    width: 153px;
-    height: 41px;
-    gap: 10px;
-}
-
-.nav-login-btn:hover {
-    background-color: #4a5c41;
-}
-
-/* Ícone de login compacto */
-.login-icon {
-    width: 20px;
-    height: 20px;
-    opacity: 0;
-    display: none;
-    transition: opacity 0.3s ease;
-}
-
-.login-text {
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: opacity 0.4s ease;
-}
-
-/* --- ESTADO COLAPSADO DO BOTÃO DE LOGIN --- */
-.floating-nav-container.collapsed .nav-login-btn {
-    width: 44px; 
-    height: 44px;
-    background-color: #607655; 
-    border-color: #153703;
+    font-family: inherit;
     padding: 0;
 }
+.nav-brand img {
+    width: 38px; height: 38px;
+    object-fit: contain;
+}
+.nav-brand span {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--zp-green-dark);
+}
 
-.floating-nav-container.collapsed .login-text {
-    opacity: 0; 
+/* --- LINKS (desktop) --- */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.nav-links button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--zp-green-dark);
+    padding: 9px 16px;
+    border-radius: 999px;
+    position: relative;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.nav-links button::after {
+    content: "";
+    position: absolute;
+    left: 16px; right: 16px; bottom: 4px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--zp-lime);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+}
+.nav-links button:hover { color: var(--zp-green); }
+.nav-links button:hover::after { transform: scaleX(1); }
+
+/* --- AÇÕES --- */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-login {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--zp-lime), var(--zp-green));
+    padding: 11px 26px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(53, 88, 36, 0.28);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.nav-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(53, 88, 36, 0.4);
+}
+
+/* --- BURGER (mobile) --- */
+.nav-burger {
     display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px; height: 44px;
+    border: 1px solid rgba(53, 88, 36, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0 11px;
 }
-
-.floating-nav-container.collapsed .login-icon {
-    opacity: 1; 
+.nav-burger span {
     display: block;
+    height: 2.5px;
+    border-radius: 2px;
+    background: var(--zp-green-dark);
+    transition: transform 0.3s ease, opacity 0.25s ease;
+}
+.nav--open .nav-burger span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.nav--open .nav-burger span:nth-child(2) { opacity: 0; }
+.nav--open .nav-burger span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* --- MENU MOBILE --- */
+.nav-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 16px 18px;
+    background: rgba(242, 247, 232, 0.96);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(53, 88, 36, 0.12);
+    /* colapsado por padrão */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease;
+}
+.nav-mobile button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--zp-green-dark);
+    padding: 14px 12px;
+    border-radius: 12px;
+    transition: background 0.2s ease;
+}
+.nav-mobile button:hover { background: rgba(137, 179, 33, 0.12); }
+.nav-mobile-login {
+    margin-top: 8px;
+    text-align: center !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--zp-lime), var(--zp-green)) !important;
 }
 
-/* --- RESPONSIVIDADE (MOBILE) --- */
-@media (max-width: 1024px) {
-    .floating-nav-container.visible {
-        width: 90%;
-        max-width: 340px;
-        justify-content: space-between;
-        padding: 0 12px;
+/* --- RESPONSIVO --- */
+@media (max-width: 860px) {
+    .nav-links { display: none; }
+    .nav-login { display: none; }
+    .nav-burger { display: flex; }
+    .nav--scrolled {
+        background: rgba(242, 247, 232, 0.92);
     }
-    
-    .nav-logo, .nav-login-area, .nav-content {
-        margin: 0 !important;
+    .nav { background: rgba(242, 247, 232, 0.7); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    .nav--open .nav-mobile {
+        display: flex;
+        max-height: 420px;
+        opacity: 1;
     }
-
-    .nav-content {
-        gap: 12px;
-    }
-
-    .nav-text { display: none !important; }
-
-    .nav-item {
-        background-color: #a5ca92 !important;
-        border: 1px solid #153703 !important;
-        border-radius: 50% !important;
-        width: 40px !important;
-        height: 40px !important;
-        justify-content: center !important;
-    }
-
-    .nav-icon {
-        opacity: 1 !important;
-        transform: scale(1) !important;
-        width: 20px !important;
-    }
-
-    .nav-login-btn {
-        width: 44px !important;
-        height: 44px !important;
-        padding: 0 !important;
-    }
-
-    .login-text { display: none !important; }
-    .login-icon { opacity: 1 !important; display: block !important; }
-}
-
-
-/* =========================================================
-   AJUSTE FINO MANUAL DOS ÍCONES DENTRO DAS BOLINHAS
-   Aqui você mexe apenas no desenho do SVG!
-========================================================= */
-
-/* 1. Ícone da Casinha (INÍCIO) */
-.floating-nav-container.collapsed .nav-item:nth-child(1) .nav-icon {
-    /* Mude os ZEROs abaixo. Ex: translate(2px, -1px) move 2px pra direita e 1px pra cima */
-    transform: translate(4px, 0px) scale(1); 
-}
-
-/* 2. Ícone do Cifrão (PLANOS) */
-.floating-nav-container.collapsed .nav-item:nth-child(2) .nav-icon {
-    transform: translate(5px, 0px) scale(1);
-}
-
-/* 3. Ícone do Balãozinho (DÚVIDAS FREQUENTES) */
-.floating-nav-container.collapsed .nav-item:nth-child(3) .nav-icon {
-    transform: translate(5px, 0px) scale(1);
-}
-
-/* 4. Ícone do Bonequinho (LOGIN) */
-.floating-nav-container.collapsed .login-icon {
-    transform: translate(0px, 0px);
+    /* garante que o menu sempre exista no DOM pra animar */
+    .nav-mobile { display: flex; }
 }

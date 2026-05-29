@@ -6,9 +6,10 @@ import { Prices } from './components/Prices/Prices';
 import { Faq } from './components/Faq/Faq';
 import { Footer } from './components/Footer/Footer';
 import { FloatingNav } from './components/FloatingNav/FloatingNav';
-import { Checkout } from './pages/Checkout/Checkout'; 
-import { Success } from './pages/Success/Success'; 
+import { Checkout } from './pages/Checkout/Checkout';
+import { Success } from './pages/Success/Success';
 import { SetPassword } from './pages/SetPassword/SetPassword'; // <-- Importe aqui
+import { PrivacyPolicy, TermsOfUse } from './pages/Legal/Legal';
 
 const Home = () => (
   <div className="app-container">
@@ -30,6 +31,8 @@ function App() {
         <Route path="/sucesso" element={<Success />} />
         {/* Adicione a rota abaixo */}
         <Route path="/criar-senha" element={<SetPassword />} />
+        <Route path="/privacidade" element={<PrivacyPolicy />} />
+        <Route path="/termos" element={<TermsOfUse />} />
       </Routes>
     </BrowserRouter>
   )

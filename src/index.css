@@ -24,6 +24,11 @@ html, body {
     padding: 0;
 }
 
+/* Compensa a navbar fixa ao rolar para seções via âncora */
+[id$="-section"] {
+    scroll-margin-top: 84px;
+}
+
 /* --- O AJUSTE VISUAL: Cores de Seleção de Texto (padrão) --- */
 /* Quando o usuário seleciona um texto em um fundo CLARO (default), 
    o realce fica Verde Escuro e a letra fica Branca. */

@@ -1,102 +1,66 @@
 import { useState, useEffect } from 'react';
 import ImgLogo from "../../assets/logo.png";
-import IconHome from "../../assets/home.svg";
-import IconPrices from "../../assets/prices.svg";
-import IconFaq from "../../assets/faq.svg";
-import IconLogin from "../../assets/login.svg";
 import './FloatingNav.css';
 
-export const FloatingNav = () => {
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [activeSections, setActiveSections] = useState({
-        prices: false,
-        faq: false,
-        footer: false
-    });
+const SITE_LOGIN = 'https://sistema-do-usuario-production.up.railway.app/';
 
-    // Função de Scroll Suave
-    const scrollToSection = (id: string) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
+export const FloatingNav = () => {
+    const [scrolled, setScrolled] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > window.innerHeight * 0.5);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        handleScroll();
-
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.15 
-        };
-
-        const sectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const id = entry.target.id;
-                if (id === 'prices-section') {
-                    setActiveSections(prev => ({ ...prev, prices: entry.isIntersecting }));
-                } else if (id === 'faq-section') {
-                    setActiveSections(prev => ({ ...prev, faq: entry.isIntersecting }));
-                } else if (id === 'footer-section') {
-                    setActiveSections(prev => ({ ...prev, footer: entry.isIntersecting }));
-                }
-            });
-        }, observerOptions);
-
-        const sections = ['prices-section', 'faq-section', 'footer-section'];
-        sections.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) sectionObserver.observe(el);
-        });
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            sectionObserver.disconnect();
-        };
+        const onScroll = () => setScrolled(window.scrollY > 24);
+        window.addEventListener('scroll', onScroll);
+        onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    const isVisible = isScrolled && !activeSections.footer;
-    const isCollapsed = activeSections.prices || activeSections.faq;
+    const toTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setMenuOpen(false);
+    };
+    const goTo = (id: string) => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        setMenuOpen(false);
+    };
+    const login = () => { window.location.href = SITE_LOGIN; };
 
     return (
-        <div className={`floating-nav-container ${isVisible ? 'visible' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-            <img 
-                className="nav-logo" 
-                alt="Logo" 
-                src={ImgLogo} 
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                style={{ cursor: 'pointer' }}
-            />
+        <header className={`nav ${scrolled ? 'nav--scrolled' : ''} ${menuOpen ? 'nav--open' : ''}`}>
+            <div className="nav-inner">
+                <button className="nav-brand" onClick={toTop} aria-label="ZapPoupe — início">
+                    <img src={ImgLogo} alt="" />
+                    <span>ZapPoupe</span>
+                </button>
 
-            <div className="nav-content">
-                <div className="nav-item" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                    <img className="nav-icon" alt="Início" src={IconHome} />
-                    <span className="nav-text">INÍCIO</span>
-                </div>
-                
-                <div className="nav-item" onClick={() => scrollToSection('prices-section')}>
-                    <img className="nav-icon" alt="Planos" src={IconPrices} />
-                    <span className="nav-text">PLANOS</span>
-                </div>
-                
-                <div className="nav-item" onClick={() => scrollToSection('faq-section')}>
-                    <img className="nav-icon" alt="Dúvidas" src={IconFaq} />
-                    <span className="nav-text">DÚVIDAS FREQUENTES</span>
+                <nav className="nav-links">
+                    <button onClick={toTop}>Início</button>
+                    <button onClick={() => goTo('features-section')}>Recursos</button>
+                    <button onClick={() => goTo('prices-section')}>Planos</button>
+                    <button onClick={() => goTo('faq-section')}>Dúvidas</button>
+                </nav>
+
+                <div className="nav-actions">
+                    <button className="nav-login" onClick={login}>Entrar</button>
+                    <button
+                        className="nav-burger"
+                        onClick={() => setMenuOpen((v) => !v)}
+                        aria-label="Abrir menu"
+                        aria-expanded={menuOpen}
+                    >
+                        <span /><span /><span />
+                    </button>
                 </div>
             </div>
 
-            <div className="nav-login-area">
-                <div className="nav-login-btn" onClick={() => window.location.href = 'https://sistema-do-usuario-production.up.railway.app/'} style={{ cursor: 'pointer' }}>
-                    <img className="login-icon" alt="Login" src={IconLogin} />
-                    <span className="login-text">LOGIN</span>
-                </div>
+            {/* Menu mobile */}
+            <div className="nav-mobile">
+                <button onClick={toTop}>Início</button>
+                <button onClick={() => goTo('features-section')}>Recursos</button>
+                <button onClick={() => goTo('prices-section')}>Planos</button>
+                <button onClick={() => goTo('faq-section')}>Dúvidas</button>
+                <button className="nav-mobile-login" onClick={login}>Entrar na conta</button>
             </div>
-        </div>
+        </header>
     );
 };

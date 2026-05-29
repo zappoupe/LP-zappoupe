@@ -1,100 +1,121 @@
 // src/components/Faq/Faq.tsx
-import { useState } from "react";
-import BgFaq from "../../assets/bg-faq.png"; // O fundo verde água
-import IconMobile from "../../assets/mobile.svg"; 
-import IconPromote from "../../assets/promote.svg"; 
-import IconMoney from "../../assets/moneys.svg"; 
-import IconBribe from "../../assets/bribe.svg"; 
-import IconYesNo from "../../assets/yesno.svg"; 
-import IconDecree from "../../assets/decree.svg"; 
+import { useState, useEffect, useRef } from "react";
+import IconMobile from "../../assets/mobile.svg";
+import IconPromote from "../../assets/promote.svg";
+import IconMoney from "../../assets/moneys.svg";
+import IconBribe from "../../assets/bribe.svg";
+import IconYesNo from "../../assets/yesno.svg";
+import IconDecree from "../../assets/decree.svg";
 import "./Faq.css";
 
-export const Faq = () => {
-    // Estado para controlar qual pergunta está aberta (começa com null = todas fechadas)
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
+const Chevron = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
-    // Função que abre/fecha a pergunta
+const FAQ_DATA = [
+    {
+        icon: IconMobile,
+        question: "O ZapPoupe é um aplicativo?",
+        answer: "Não! É um assistente que funciona diretamente no WhatsApp. Sem downloads, sem complicações.",
+    },
+    {
+        icon: IconPromote,
+        question: "Preciso falar com ele todos os dias?",
+        answer: "Não precisa, porém quanto mais você usa o ZapPoupe, mais ele entende seu perfil e cria estratégias financeiras sob medida, ajudando você a economizar e planejar com muito mais clareza.",
+    },
+    {
+        icon: IconMoney,
+        question: "E se eu não entender de finanças?",
+        answer: "Fique tranquilo(a)! O ZapPoupe foi feito para te auxiliar em todas as suas dúvidas sobre dinheiro. Ele explica tudo de forma simples, prática e fácil de entender, mesmo que você nunca tenha lidado com finanças antes.",
+    },
+    {
+        icon: IconYesNo,
+        question: "Como eu informo meus gastos e receitas?",
+        answer: "Você pode mandar mensagens de texto, áudios ou até fotos das notas fiscais. O ZapPoupe entende tudo e registra para você.",
+    },
+    {
+        icon: IconBribe,
+        question: "O ZapPoupe funciona para quem tem renda variável ou informal?",
+        answer: "Com certeza! Ele foi feito para se adaptar à sua realidade, seja salário fixo, renda informal ou até quem vive de freelas.",
+    },
+    {
+        icon: IconDecree,
+        question: "O ZapPoupe me ajuda a economizar de verdade?",
+        answer: "Sim! Além de mostrar para onde o dinheiro está indo, ele te envia sugestões personalizadas para reduzir gastos e melhorar sua saúde financeira.",
+    },
+];
+
+export const Faq = () => {
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
+    const [visible, setVisible] = useState(false);
+    const sectionRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const el = sectionRef.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) {
+                    setVisible(true);
+                    obs.disconnect();
+                }
+            },
+            { threshold: 0.12 },
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
     const toggleFaq = (index: number) => {
-        if (openIndex === index) {
-            setOpenIndex(null); // Se clicar na que já tá aberta, ela fecha
-        } else {
-            setOpenIndex(index); // Abre a nova que foi clicada
-        }
+        setOpenIndex(openIndex === index ? null : index);
     };
 
-    // Lista com as suas perguntas e respostas
-    const faqData = [
-        {
-            icon: IconMobile,
-            question: "O ZAPPOUPE É UM APLICATIVO ?",
-            answer: "Não! É um assistente que funciona diretamente no WhatsApp. Sem downloads, sem complicações."
-        },
-        {
-            icon: IconPromote,
-            question: "PRECISO FALAR COM ELE TODOS OS DIAS ?",
-            answer: "Não precisa, porém quanto mais você usa o ZapPoupe, mais ele entende seu perfil e cria estratégias financeiras sob medida, ajudando você a economizar e planejar com muito mais clareza."
-        },
-        {
-            icon: IconMoney,
-            question: "E SE EU NÃO ENTENDER DE FINANÇAS ?",
-            answer: "Fique tranquilo(a)! O ZapPoupe foi feito para te auxiliar em todas as suas dúvidas sobre dinheiro. Ele explica tudo de forma simples, prática e fácil de entender, mesmo que você nunca tenha lidado com finanças antes."
-        },
-        {
-            icon: IconYesNo,
-            question: "COMO EU INFORMO MEUS GASTOS E RECEITAS ?",
-            answer: "Você pode mandar mensagens de texto, áudios ou até fotos das notas fiscais. O ZapPoupe entende tudo e registra para você."
-        },
-        {
-            icon: IconBribe,
-            question: "O ZAPPOUPE FUNCIONA PARA QUEM TEM RENDA VARIÁVEL OU INFORMAL ?",
-            answer: "Com certeza! Ele foi feito para se adaptar à sua realidade, seja salário fixo, renda informal ou até quem vive de freelas."
-        },
-        {
-            icon: IconDecree,
-            question: "O ZAPPOUPE ME AJUDA A ECONOMIZAR DE VERDADE ?",
-            answer: "Sim! Além de mostrar para onde o dinheiro está indo, ele te envia sugestões personalizadas para reduzir gastos e melhorar sua saúde financeira."
-        }
-    ];
-
     return (
-        <section className="faq-section" id="faq-section">
-            <div className="faq-background">
-                <img src={BgFaq} alt="Fundo Abstrato FAQ" />
-            </div>
+        <section ref={sectionRef} className={`faq-section ${visible ? "is-visible" : ""}`} id="faq-section">
+            <div className="faq-blob faq-blob--1" aria-hidden="true" />
+            <div className="faq-blob faq-blob--2" aria-hidden="true" />
 
-            <div className="faq-content">
-                
-                {/* Lado Esquerdo: Textos */}
+            <div className="faq-inner">
+                {/* Lado esquerdo */}
                 <div className="faq-left">
-                    <h2 className="faq-title card-anim-1">DÚVIDAS FREQUENTES</h2>
-                    <p className="faq-description card-anim-2">
-                        É super normal ter algumas perguntas antes de dar o primeiro passo. 
-                        Separamos as dúvidas mais comuns de quem está prestes a transformar a 
+                    <span className="faq-eyebrow">
+                        <span className="faq-eyebrow-dot" />
+                        03 — DÚVIDAS
+                    </span>
+                    <h2 className="faq-title">
+                        Perguntas <em>frequentes</em>
+                    </h2>
+                    <p className="faq-description">
+                        É super normal ter algumas perguntas antes de dar o primeiro passo.
+                        Separamos as dúvidas mais comuns de quem está prestes a transformar a
                         vida financeira. Dá uma olhadinha!
                     </p>
                 </div>
 
-                {/* Lado Direito: Lista de Perguntas (Sanfona) */}
-                <div className="faq-right">
-                    {faqData.map((item, index) => {
+                {/* Lado direito: acordeão */}
+                <div className="faq-list">
+                    {FAQ_DATA.map((item, index) => {
                         const isOpen = openIndex === index;
-
                         return (
-                            <div 
-                                key={index} 
-                                className={`faq-item card-anim-${index + 3} ${isOpen ? 'open' : ''}`}
-                                onClick={() => toggleFaq(index)}
+                            <div
+                                key={index}
+                                className={`faq-item ${isOpen ? "open" : ""}`}
+                                style={{ transitionDelay: `${0.1 + index * 0.07}s` }}
                             >
-                                <div className="faq-item-header">
-                                    <img className="faq-icon" alt="Ícone" src={item.icon} />
-                                    <p className="faq-question">{item.question}</p>
-                                    
-                                    {/* Sinalzinho de + e - no canto */}
-                                    <span className="faq-toggle-icon">{isOpen ? '-' : '+'}</span>
-                                </div>
-                                
+                                <button className="faq-item-header" onClick={() => toggleFaq(index)}>
+                                    <span className="faq-icon-wrap">
+                                        <img className="faq-icon" alt="" src={item.icon} />
+                                    </span>
+                                    <span className="faq-question">{item.question}</span>
+                                    <span className="faq-chevron"><Chevron /></span>
+                                </button>
+
                                 <div className="faq-item-body">
-                                    <p className="faq-answer">{item.answer}</p>
+                                    <div className="faq-item-body-inner">
+                                        <p className="faq-answer">{item.answer}</p>
+                                    </div>
                                 </div>
                             </div>
                         );
