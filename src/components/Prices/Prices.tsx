@@ -64,6 +64,14 @@ export const Prices = () => {
 
     const fmt = (v: number) => v.toFixed(2).replace('.', ',');
 
+    // Desconto real do anual = quanto se economiza vs. pagar 12 meses no mensal
+    const discountPct = (annual: number, monthly: number) =>
+        Math.round((1 - annual / (monthly * 12)) * 100);
+
+    const individualDiscount = discountPct(prices.individual.annual, prices.individual.monthly);
+    const familyDiscount = discountPct(prices.family.annual, prices.family.monthly);
+    const maxDiscount = Math.max(individualDiscount, familyDiscount);
+
     return (
         <section
             ref={sectionRef}
@@ -95,7 +103,7 @@ export const Prices = () => {
                         <span className={`toggle-knob ${isAnnual ? "annual" : "monthly"}`} />
                     </button>
                     <span className={isAnnual ? "active" : ""}>
-                        Anual <span className="discount-badge">-20%</span>
+                        Anual <span className="discount-badge">economize até {maxDiscount}%</span>
                     </span>
                 </div>
 
@@ -117,7 +125,12 @@ export const Prices = () => {
                             <span className="period">{isAnnual ? '/ano' : '/mês'}</span>
                         </div>
                         <p className="monthly-equivalent">
-                            {isAnnual ? `equivalente a R$ ${fmt(prices.individual.annual / 12)} /mês` : ' '}
+                            {isAnnual ? (
+                                <>
+                                    equivalente a R$ {fmt(prices.individual.annual / 12)} /mês{' '}
+                                    <strong className="save-pct">· economize {individualDiscount}%</strong>
+                                </>
+                            ) : ' '}
                         </p>
 
                         <ul className="plan-features">
@@ -149,7 +162,12 @@ export const Prices = () => {
                             <span className="period">{isAnnual ? '/ano' : '/mês'}</span>
                         </div>
                         <p className="monthly-equivalent">
-                            {isAnnual ? `equivalente a R$ ${fmt(prices.family.annual / 12)} /mês` : ' '}
+                            {isAnnual ? (
+                                <>
+                                    equivalente a R$ {fmt(prices.family.annual / 12)} /mês{' '}
+                                    <strong className="save-pct">· economize {familyDiscount}%</strong>
+                                </>
+                            ) : ' '}
                         </p>
 
                         <ul className="plan-features">
