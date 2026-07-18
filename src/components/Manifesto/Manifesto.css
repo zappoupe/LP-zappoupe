@@ -1,0 +1,40 @@
+/* src/components/Manifesto/Manifesto.css */
+
+.manifesto {
+    background: var(--zp-ink);
+    color: #fff;
+    text-align: center;
+    padding-block: clamp(52px, 7vh, 80px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Brilho sutil atrás do texto */
+.manifesto::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 620px;
+    height: 320px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(164, 214, 94, .16), transparent 70%);
+    pointer-events: none;
+}
+
+.manifesto h2 {
+    position: relative;
+    font-family: var(--zp-font-display);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+    line-height: 1.4;
+    letter-spacing: -.01em;
+    max-width: 38ch;
+    margin: 0 auto;
+    text-wrap: balance;
+}
+
+.manifesto em {
+    font-style: normal;
+    color: var(--zp-accent);
+}

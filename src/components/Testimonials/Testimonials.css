@@ -1,0 +1,150 @@
+/* src/components/Testimonials/Testimonials.css */
+
+.tst {
+    background: var(--zp-bg);
+}
+
+.tst-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tst-head .zp-sub {
+    margin-bottom: 0;
+}
+
+.tst-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    max-width: 1080px;
+    margin: 48px auto 0;
+}
+
+@media (max-width: 940px) {
+    .tst-grid {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+}
+
+/* ── Cartão ── */
+.tst-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--zp-surface);
+    border: 1px solid var(--zp-line);
+    border-radius: var(--zp-r-lg);
+    padding: 30px 28px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--zp-shadow-sm);
+    transition: transform var(--zp-t-med) var(--zp-ease),
+        box-shadow var(--zp-t-med) var(--zp-ease),
+        border-color var(--zp-t-med) var(--zp-ease),
+        opacity var(--zp-t-slow) var(--zp-ease);
+}
+
+.tst-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(164, 214, 94, .6);
+    box-shadow: var(--zp-shadow-lg);
+}
+
+/* Faixa de cor no topo, uma por depoimento */
+.tst-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--av-a), var(--av-b));
+}
+
+/* Aspas decorativas no canto */
+.tst-mark {
+    position: absolute;
+    top: 6px;
+    right: 18px;
+    font-family: var(--zp-font-display);
+    font-size: 6rem;
+    line-height: 1;
+    color: var(--av-a);
+    opacity: .13;
+    pointer-events: none;
+    user-select: none;
+}
+
+
+.tst-card blockquote {
+    font-size: 1rem;
+    line-height: 1.68;
+    color: var(--zp-ink);
+    flex: 1;
+    text-wrap: pretty;
+}
+
+/* ── Autoria ── */
+.tst-who {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding-top: 16px;
+    border-top: 1px solid var(--zp-line);
+}
+
+.tst-av {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--zp-font-display);
+    font-weight: 800;
+    font-size: .82rem;
+    letter-spacing: .02em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--av-a), var(--av-b));
+    box-shadow: 0 0 0 3px var(--zp-surface), 0 0 0 4.5px var(--av-ring);
+}
+
+.tst-id {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.35;
+}
+
+.tst-id strong {
+    color: var(--zp-ink);
+    font-size: .93rem;
+    font-weight: 600;
+}
+
+.tst-loc {
+    font-size: .82rem;
+    color: var(--zp-ink-faint);
+}
+
+/* ── Paleta por cartão ──
+   Sem fotos, a cor do monograma é o que dá identidade a cada pessoa. */
+.tst-card:nth-child(1) {
+    --av-a: #6FA83C;
+    --av-b: #3F6B18;
+    --av-ring: rgba(111, 168, 60, .26);
+}
+
+.tst-card:nth-child(2) {
+    --av-a: #2E9E7E;
+    --av-b: #14664F;
+    --av-ring: rgba(46, 158, 126, .26);
+}
+
+.tst-card:nth-child(3) {
+    --av-a: #C9922B;
+    --av-b: #8A5E12;
+    --av-ring: rgba(201, 146, 43, .26);
+}
+

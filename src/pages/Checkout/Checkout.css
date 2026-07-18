@@ -101,7 +101,9 @@
     margin-bottom: 24px;
 }
 .co-trial-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--zp-lime);
     color: #0e2902;
     font-size: 11px;

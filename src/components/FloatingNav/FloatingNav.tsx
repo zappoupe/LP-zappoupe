@@ -35,13 +35,17 @@ export const FloatingNav = () => {
 
                 <nav className="nav-links">
                     <button onClick={toTop}>Início</button>
-                    <button onClick={() => goTo('features-section')}>Recursos</button>
+                    <button onClick={() => goTo('features-section')}>Benefícios</button>
+                    <button onClick={() => goTo('como-funciona')}>Recursos</button>
                     <button onClick={() => goTo('prices-section')}>Planos</button>
                     <button onClick={() => goTo('faq-section')}>Dúvidas</button>
                 </nav>
 
                 <div className="nav-actions">
                     <button className="nav-login" onClick={login}>Entrar</button>
+                    <button className="nav-cta" onClick={() => goTo('prices-section')}>
+                        Testar grátis
+                    </button>
                     <button
                         className="nav-burger"
                         onClick={() => setMenuOpen((v) => !v)}
@@ -56,9 +60,13 @@ export const FloatingNav = () => {
             {/* Menu mobile */}
             <div className="nav-mobile">
                 <button onClick={toTop}>Início</button>
-                <button onClick={() => goTo('features-section')}>Recursos</button>
+                <button onClick={() => goTo('features-section')}>Benefícios</button>
+                <button onClick={() => goTo('como-funciona')}>Recursos</button>
                 <button onClick={() => goTo('prices-section')}>Planos</button>
                 <button onClick={() => goTo('faq-section')}>Dúvidas</button>
+                <button className="nav-mobile-cta" onClick={() => goTo('prices-section')}>
+                    Testar grátis
+                </button>
                 <button className="nav-mobile-login" onClick={login}>Entrar na conta</button>
             </div>
         </header>

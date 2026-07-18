@@ -1,0 +1,59 @@
+/* src/components/ProofBar/ProofBar.css */
+
+.proofbar {
+    background: var(--zp-ink);
+    color: #fff;
+    padding: 32px var(--zp-gutter);
+}
+
+.proofbar-inner {
+    max-width: var(--zp-max);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+    align-items: center;
+}
+
+@media (max-width: 880px) {
+    .proofbar-inner {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px 20px;
+    }
+}
+
+@media (max-width: 440px) {
+    .proofbar-inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+.proofbar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--zp-text-sm);
+}
+
+.proofbar-item b {
+    font-family: var(--zp-font-display);
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--zp-accent);
+    line-height: 1;
+    flex: none;
+}
+
+.proofbar-item span {
+    opacity: .85;
+    line-height: 1.35;
+}
+
+.proofbar-note {
+    max-width: var(--zp-max);
+    margin: 12px auto 0;
+    text-align: center;
+    font-size: .72rem;
+    opacity: .55;
+    line-height: 1.4;
+}

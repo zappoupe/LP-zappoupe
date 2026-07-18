@@ -48,10 +48,16 @@
     object-fit: contain;
 }
 .nav-brand span {
+    font-family: var(--zp-font-display);
     font-size: 20px;
-    font-weight: 900;
+    font-weight: 800;
     letter-spacing: -0.01em;
     color: var(--zp-green-dark);
+}
+
+/* Em telas bem estreitas o CTA cede espaço pra marca + burger */
+@media (max-width: 430px) {
+    .nav-cta { display: none; }
 }
 
 /* --- LINKS (desktop) --- */
@@ -93,23 +99,44 @@
     align-items: center;
     gap: 12px;
 }
+/* "Entrar" é ação secundária — quem já é cliente acha fácil, mas ela não
+   compete com o CTA de teste grátis, que é o objetivo da página. */
 .nav-login {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--zp-green-dark);
+    padding: 10px 16px;
+    border-radius: 999px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.nav-login:hover {
+    color: var(--zp-green);
+    background: rgba(137, 179, 33, 0.12);
+}
+
+/* CTA principal da nav */
+.nav-cta {
     border: none;
     cursor: pointer;
     font-family: inherit;
     font-size: 14.5px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    letter-spacing: 0.01em;
     color: #fff;
-    background: linear-gradient(135deg, var(--zp-lime), var(--zp-green));
-    padding: 11px 26px;
+    background: var(--zp-wa);
+    padding: 11px 24px;
     border-radius: 999px;
-    box-shadow: 0 6px 18px rgba(53, 88, 36, 0.28);
-    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.32);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
-.nav-login:hover {
+.nav-cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 26px rgba(53, 88, 36, 0.4);
+    background: var(--zp-wa-dark);
+    box-shadow: 0 12px 26px rgba(37, 211, 102, 0.42);
 }
 
 /* --- BURGER (mobile) --- */
@@ -166,12 +193,17 @@
     transition: background 0.2s ease;
 }
 .nav-mobile button:hover { background: rgba(137, 179, 33, 0.12); }
-.nav-mobile-login {
+.nav-mobile-cta {
     margin-top: 8px;
     text-align: center !important;
     color: #fff !important;
-    font-weight: 800 !important;
-    background: linear-gradient(135deg, var(--zp-lime), var(--zp-green)) !important;
+    font-weight: 700 !important;
+    background: var(--zp-wa) !important;
+}
+.nav-mobile-login {
+    text-align: center !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(53, 88, 36, 0.22) !important;
 }
 
 /* --- RESPONSIVO --- */
@@ -185,7 +217,8 @@
     .nav { background: rgba(242, 247, 232, 0.7); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
     .nav--open .nav-mobile {
         display: flex;
-        max-height: 420px;
+        /* folgado o bastante pros 4 links + CTA + entrar */
+        max-height: 520px;
         opacity: 1;
     }
     /* garante que o menu sempre exista no DOM pra animar */

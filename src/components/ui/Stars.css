@@ -1,0 +1,9 @@
+/* src/components/ui/Stars.css */
+
+.zp-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: #F5A623;
+    line-height: 1;
+}

@@ -1,0 +1,236 @@
+/* src/styles/tokens.css
+   Design tokens da LP ZapPoupe.
+   Fonte única de verdade para cor, tipo, espaço e sombra.
+   Qualquer componente da LP deve consumir daqui — nada de hex solto. */
+
+:root {
+    /* ── Cor: base ── */
+    --zp-bg: #F2F7E8;
+    --zp-bg-alt: #FFFFFF;
+    --zp-surface: #FFFFFF;
+    --zp-ink: #143703;
+    --zp-ink-soft: #41603F;
+    --zp-ink-faint: #6B8268;
+    --zp-line: rgba(20, 55, 3, .10);
+    --zp-line-strong: rgba(20, 55, 3, .18);
+
+    /* ── Cor: marca ── */
+    --zp-accent: #A4D65E;
+    --zp-accent-soft: #DDEFC3;
+    --zp-accent-deep: #5A8C28;
+    --zp-accent-deeper: #3F6B18;
+
+    /* ── Cor: legado ──
+       Nomes usados pelas telas antigas (Checkout, Legal e afins). Os valores
+       são idênticos aos do :root de Checkout.css de propósito: se um dia as
+       duas definições brigarem por ordem de import, o resultado é o mesmo.
+       Não use estes em código novo — prefira os --zp-accent-* acima. */
+    --zp-green-dark: #143703;
+    --zp-green: #355824;
+    --zp-lime: #89b321;
+    --zp-lime-soft: #a8d44a;
+    --zp-cream: #f2f7e8;
+
+    /* ── Cor: WhatsApp (usado só no que imita o Zap) ── */
+    --zp-wa: #25D366;
+    --zp-wa-dark: #1DA851;
+    --zp-wa-header: #075E54;
+    --zp-chat-bg: #EFE7DD;
+    --zp-bubble-user: #DCF8C6;
+    --zp-bubble-bot: #FFFFFF;
+
+    /* ── Tipografia ── */
+    --zp-font-display: 'Bricolage Grotesque', 'Montserrat', system-ui, sans-serif;
+    --zp-font-body: 'Inter', 'Montserrat', system-ui, -apple-system, sans-serif;
+
+    /* Escala fluida — clamp(min, preferido, max) */
+    --zp-text-xs: .78rem;
+    --zp-text-sm: .87rem;
+    --zp-text-base: 1rem;
+    --zp-text-lg: 1.08rem;
+    --zp-text-xl: clamp(1.15rem, 1.6vw, 1.3rem);
+    --zp-text-h3: clamp(1.1rem, 1.9vw, 1.32rem);
+    --zp-text-h2: clamp(1.75rem, 3.6vw, 2.6rem);
+    --zp-text-h1: clamp(2.1rem, 4.8vw, 3.6rem);
+
+    /* ── Espaço ── */
+    --zp-gutter: clamp(20px, 5vw, 64px);
+    --zp-section-y: clamp(60px, 9vh, 104px);
+    --zp-max: 1200px;
+    --zp-max-wide: 1280px;
+
+    /* ── Raio ── */
+    --zp-r-sm: 12px;
+    --zp-r-md: 18px;
+    --zp-r-lg: 24px;
+    --zp-r-xl: 32px;
+    --zp-r-pill: 999px;
+
+    /* ── Sombra ── */
+    --zp-shadow-sm: 0 2px 10px rgba(20, 55, 3, .05);
+    --zp-shadow-md: 0 4px 20px rgba(20, 55, 3, .07);
+    --zp-shadow-lg: 0 18px 44px rgba(20, 55, 3, .13);
+    --zp-shadow-xl: 0 30px 70px rgba(20, 55, 3, .28);
+    --zp-shadow-wa: 0 6px 20px rgba(37, 211, 102, .35);
+    --zp-shadow-wa-hover: 0 10px 26px rgba(37, 211, 102, .45);
+
+    /* ── Movimento ── */
+    --zp-ease: cubic-bezier(.22, .61, .36, 1);
+    --zp-t-fast: .15s;
+    --zp-t-med: .3s;
+    --zp-t-slow: .6s;
+}
+
+/* ══════════════════════════════════════════
+   Primitivos compartilhados entre seções
+   ══════════════════════════════════════════ */
+
+.zp-section {
+    padding: var(--zp-section-y) var(--zp-gutter);
+    position: relative;
+}
+
+.zp-container {
+    max-width: var(--zp-max);
+    margin: 0 auto;
+}
+
+.zp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--zp-surface);
+    border: 1px solid var(--zp-line-strong);
+    padding: 8px 16px;
+    border-radius: var(--zp-r-pill);
+    font-size: var(--zp-text-xs);
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--zp-ink-soft);
+}
+
+.zp-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--zp-wa);
+    animation: zp-pulse 2s infinite;
+}
+
+@keyframes zp-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .35;
+    }
+}
+
+.zp-title {
+    font-family: var(--zp-font-display);
+    font-weight: 800;
+    font-size: var(--zp-text-h2);
+    line-height: 1.12;
+    letter-spacing: -.015em;
+    text-align: center;
+    text-wrap: balance;
+}
+
+.zp-title em {
+    font-style: normal;
+    color: var(--zp-accent-deep);
+}
+
+.zp-sub {
+    text-align: center;
+    color: var(--zp-ink-soft);
+    font-size: var(--zp-text-lg);
+    max-width: 36rem;
+    margin: 14px auto 48px;
+    line-height: 1.62;
+    text-wrap: pretty;
+}
+
+/* ── Botão CTA principal (verde WhatsApp) ── */
+.zp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--zp-wa);
+    color: #fff;
+    font-family: var(--zp-font-body);
+    font-weight: 700;
+    font-size: 1.02rem;
+    line-height: 1;
+    padding: 17px 30px;
+    border-radius: var(--zp-r-pill);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: var(--zp-shadow-wa);
+    transition: transform var(--zp-t-fast) var(--zp-ease),
+        box-shadow var(--zp-t-fast) var(--zp-ease),
+        background var(--zp-t-fast) var(--zp-ease);
+}
+
+.zp-cta:hover {
+    transform: translateY(-2px);
+    background: var(--zp-wa-dark);
+    box-shadow: var(--zp-shadow-wa-hover);
+}
+
+.zp-cta:active {
+    transform: translateY(0);
+}
+
+.zp-cta svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+}
+
+/* ── Foco visível e consistente no site inteiro ── */
+.zp-cta:focus-visible,
+.zp-eyebrow:focus-visible,
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid var(--zp-accent-deep);
+    outline-offset: 3px;
+    border-radius: var(--zp-r-sm);
+}
+
+/* ── Reveal on scroll: estado inicial + estado visível ──
+   O componente adiciona .is-visible quando o IntersectionObserver dispara. */
+.zp-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--zp-t-slow) var(--zp-ease),
+        transform var(--zp-t-slow) var(--zp-ease);
+}
+
+.is-visible .zp-reveal {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── Acessibilidade: respeita quem pediu menos movimento ── */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .zp-reveal {
+        opacity: 1;
+        transform: none;
+    }
+}

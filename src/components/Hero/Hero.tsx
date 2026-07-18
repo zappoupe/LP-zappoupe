@@ -1,75 +1,93 @@
 // src/components/Hero/Hero.tsx
-import ImgMoca from "../../assets/Objeto.png";
-import IconVoice from "../../assets/voice.svg";
-import IconMessage from "../../assets/message.svg";
-import IconMobile from "../../assets/mobile.svg";
-import "./Hero.css";
+import { WhatsAppDemo } from '../WhatsAppDemo/WhatsAppDemo';
+import { WhatsAppIcon } from '../ui/WhatsAppIcon';
+import { Stars } from '../ui/Stars';
+import { HERO_TESTIMONIAL, USER_COUNT } from '../../data/socialProof';
+import { goToPlans, scrollToId } from '../../lib/scroll';
+import './Hero.css';
 
-export const Hero = () => {
-    const scrollToPrices = () => {
-        const element = document.getElementById('prices-section');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
+const Check = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+        <path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
-    return (
-        <section className="hero-section">
-            {/* Blobs orgânicos de fundo */}
-            <div className="hero-blob hero-blob--1" aria-hidden="true" />
-            <div className="hero-blob hero-blob--2" aria-hidden="true" />
+const GARANTIAS = ['30 dias grátis', 'Sem cartão de crédito', 'Cancele quando quiser, sem multa'];
 
-            <div className="hero-inner">
-                {/* ── COLUNA DE TEXTO ── */}
-                <div className="hero-copy">
-                    <span className="hero-badge">
-                        <span className="hero-badge-dot" />
-                        VOCÊ FALA, O ZAPPOUPE ENTENDE.
-                    </span>
+export const Hero = () => (
+    <section className="hero">
+        <div className="hero-blob hero-blob--1" aria-hidden="true" />
+        <div className="hero-blob hero-blob--2" aria-hidden="true" />
 
-                    <h1 className="hero-title">
-                        <span className="hero-title-lead">SUA GRANA</span>
-                        FINALMENTE<br />SE ORGANIZA.
-                    </h1>
+        <div className="hero-inner">
+            {/* ── Coluna de texto ── */}
+            <div className="hero-copy">
+                <span className="zp-eyebrow hero-eyebrow">
+                    <span className="zp-eyebrow-dot" />
+                    Funciona no seu WhatsApp · sem baixar nada
+                </span>
 
-                    <p className="hero-sub">
-                        Se o dinheiro sempre some, o ZapPoupe te mostra o caminho de volta ao controle.
-                    </p>
-
-                    <div className="hero-actions">
-                        <button className="hero-cta" onClick={scrollToPrices}>
-                            COMEÇAR MEU CONTROLE AGORA
-                        </button>
-                        <span className="hero-trust">
-                            ✓ 30 dias grátis · cancele quando quiser
+                <h1 className="hero-title">
+                    <span className="hero-bubble">&ldquo;{HERO_TESTIMONIAL.quote}&rdquo;</span>
+                    <span className="hero-title-line">
+                        Foi o {HERO_TESTIMONIAL.author.split(' ')[0]}.{' '}
+                        <span className="hero-title-quiet">
+                            Agora chegou a sua vez de economizar usando IA.
                         </span>
-                    </div>
+                    </span>
+                </h1>
 
-                    {/* Chips dos modos de registro */}
-                    <div className="hero-modes">
-                        <span className="hero-mode"><img src={IconVoice} alt="" /> Áudio</span>
-                        <span className="hero-mode"><img src={IconMessage} alt="" /> Texto</span>
-                        <span className="hero-mode"><img src={IconMobile} alt="" /> Foto</span>
-                    </div>
+                <p className="hero-attrib">
+                    — <strong>{HERO_TESTIMONIAL.author}</strong>, {HERO_TESTIMONIAL.role}
+                    <span className="hero-attrib-note">*{HERO_TESTIMONIAL.disclaimer}</span>
+                </p>
+
+                <p className="hero-sub">
+                    O ZapPoupe é uma <strong>IA que vive no seu WhatsApp</strong> e cuida do seu
+                    dinheiro por você: registra o gasto, categoriza sozinho, avisa{' '}
+                    <strong>antes</strong> da conta vencer e te mostra pra onde o dinheiro foi —
+                    tudo em segundos, sem baixar app, sem abrir planilha e sem digitar em campo
+                    nenhum.
+                </p>
+
+                <div className="hero-actions">
+                    <button className="zp-cta" onClick={goToPlans}>
+                        <WhatsAppIcon />
+                        Testar grátis no meu WhatsApp
+                    </button>
+                    <button className="hero-link" onClick={() => scrollToId('demo')}>
+                        Ver funcionando →
+                    </button>
                 </div>
 
-                {/* ── COLUNA VISUAL ── */}
-                <div className="hero-visual">
-                    <div className="hero-visual-glow" aria-hidden="true" />
-                    <img className="hero-img" alt="Pessoa usando o ZapPoupe" src={ImgMoca} />
+                <ul className="hero-risk">
+                    {GARANTIAS.map((g) => (
+                        <li key={g}>
+                            <span className="hero-risk-check"><Check /></span>
+                            {g}
+                        </li>
+                    ))}
+                </ul>
 
-                    {/* Bubble do usuário */}
-                    <div className="hero-chat hero-chat--user">
-                        Gastei 50 no mercado 🛒
+                <div className="hero-proof">
+                    <div className="hero-avatars" aria-hidden="true">
+                        {['M', 'J', 'A', 'R'].map((l) => (
+                            <span key={l}>{l}</span>
+                        ))}
                     </div>
-
-                    {/* Bubble do bot */}
-                    <div className="hero-chat hero-chat--bot">
-                        <span className="hero-chat-check">✓</span>
-                        Despesa registrada! Categoria: Alimentação
-                    </div>
+                    <p>
+                        <Stars size={14} />
+                        <span>
+                            <strong>{USER_COUNT}</strong> já organizam a grana pelo Zap
+                        </span>
+                    </p>
                 </div>
             </div>
-        </section>
-    );
-};
+
+            {/* ── Coluna visual: demo interativa ── */}
+            <div className="hero-visual" id="demo">
+                <WhatsAppDemo />
+            </div>
+        </div>
+    </section>
+);

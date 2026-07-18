@@ -44,40 +44,55 @@
     text-align: center;
     margin-bottom: 32px;
 }
+/* O visual da pílula vem de .zp-eyebrow (tokens.css). Aqui fica só a
+   entrada animada — assim as duas classes não brigam por cor e tamanho. */
 .prices-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    color: var(--zp-green);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
     margin-bottom: 16px;
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.prices-eyebrow-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--zp-lime);
-    box-shadow: 0 0 0 4px rgba(137, 179, 33, 0.22);
-}
 .prices-title {
     margin: 0 auto;
     max-width: 680px;
-    color: var(--zp-green-dark);
-    font-weight: 900;
-    font-size: clamp(28px, 4vw, 48px);
-    line-height: 1.08;
+    font-family: var(--zp-font-display);
+    color: var(--zp-ink);
+    font-weight: 800;
+    font-size: var(--zp-text-h2);
+    line-height: 1.1;
     letter-spacing: -0.02em;
+    text-wrap: balance;
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
 }
-.prices-title em { font-style: italic; color: var(--zp-lime); }
+.prices-title em { font-style: normal; color: var(--zp-accent-deep); }
+.prices-sub {
+    max-width: 34rem;
+    margin: 14px auto 0;
+    color: var(--zp-ink-soft);
+    font-size: var(--zp-text-lg);
+    line-height: 1.6;
+    text-wrap: pretty;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s ease 0.16s, transform 0.6s ease 0.16s;
+}
 .prices-section.is-visible .prices-eyebrow,
-.prices-section.is-visible .prices-title { opacity: 1; transform: translateY(0); }
+.prices-section.is-visible .prices-title,
+.prices-section.is-visible .prices-sub { opacity: 1; transform: translateY(0); }
+
+/* Fecho da seção */
+.plans-note {
+    max-width: 40rem;
+    margin: 34px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--zp-ink-soft);
+    line-height: 1.6;
+    text-wrap: pretty;
+}
 
 /* --- TOGGLE --- */
 .billing-toggle {
@@ -199,8 +214,9 @@
 }
 .plan-name {
     margin: 0;
+    font-family: var(--zp-font-display);
     font-size: 26px;
-    font-weight: 900;
+    font-weight: 800;
     color: var(--zp-green-dark);
     letter-spacing: -0.01em;
 }
@@ -238,8 +254,9 @@
 }
 .currency { font-size: 22px; font-weight: 700; color: var(--zp-green); }
 .amount {
+    font-family: var(--zp-font-display);
     font-size: clamp(40px, 5vw, 52px);
-    font-weight: 900;
+    font-weight: 800;
     color: var(--zp-green-dark);
     letter-spacing: -0.02em;
 }

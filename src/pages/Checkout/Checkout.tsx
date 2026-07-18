@@ -1,6 +1,7 @@
 // src/pages/Checkout/Checkout.tsx
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './Checkout.css';
@@ -120,10 +121,10 @@ export const Checkout = () => {
             "Gráficos de saúde financeira no WhatsApp"
         ]
         : [
-            "Tudo do plano individual",
+            "Tudo do plano Individual",
             "Até 3 membros incluídos (+ membros extras)",
-            "Controles familiares e individuais",
-            "Categorização e relatórios familiares"
+            "Controles familiares e individuais separados",
+            "Relatórios da família inteira"
         ];
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +217,10 @@ export const Checkout = () => {
                     </div>
 
                     <div className="co-trial">
-                        <span className="co-trial-badge">✨ 30 DIAS GRÁTIS</span>
+                        <span className="co-trial-badge">
+                            <Sparkles size={14} strokeWidth={2.2} aria-hidden="true" />
+                            30 DIAS GRÁTIS
+                        </span>
                         <p>Você não será cobrado hoje. A primeira cobrança acontece apenas após os 30 dias de teste — cancele quando quiser.</p>
                     </div>
 

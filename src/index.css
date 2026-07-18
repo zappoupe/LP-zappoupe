@@ -1,5 +1,7 @@
 /* src/index.css */
 
+@import './styles/tokens.css';
+
 /* Reset Global de Margens e Padding para o Vite não bugar */
 * {
     margin: 0;
@@ -8,11 +10,20 @@
 }
 
 html, body {
-    width: 100vw;
+    /* 100vw ignora a largura da scrollbar e causa rolagem horizontal no
+       Windows/Chrome — 100% respeita. */
+    width: 100%;
     min-height: 100vh;
     overflow-x: hidden; /* Evita rolagem horizontal teimosa */
-    background-color: #f2f7e8; /* Cor de fundo principal */
-    font-family: 'Montserrat', sans-serif;
+    background-color: var(--zp-bg); /* Cor de fundo principal */
+    font-family: var(--zp-font-body);
+    color: var(--zp-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 #root {
@@ -24,8 +35,12 @@ html, body {
     padding: 0;
 }
 
-/* Compensa a navbar fixa ao rolar para seções via âncora */
-[id$="-section"] {
+/* Compensa a navbar fixa ao rolar para seções via âncora.
+   Vale pros ids terminados em -section e também pras âncoras
+   nomeadas do HTML de referência (#como-funciona, #demo). */
+[id$="-section"],
+#como-funciona,
+#demo {
     scroll-margin-top: 84px;
 }
 

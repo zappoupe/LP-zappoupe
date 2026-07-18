@@ -17,10 +17,10 @@ const INDIVIDUAL_FEATURES = [
 ];
 
 const FAMILY_FEATURES = [
-    "Tudo do plano individual",
+    "Tudo do plano Individual",
     "Até 3 membros incluídos",
-    "Controles familiares e individuais",
-    "Categorização e relatórios familiares",
+    "Controles familiares e individuais separados",
+    "Relatórios da família inteira",
 ];
 
 export const Prices = () => {
@@ -83,13 +83,16 @@ export const Prices = () => {
 
             <div className="prices-content">
                 <div className="prices-head">
-                    <span className="prices-eyebrow">
-                        <span className="prices-eyebrow-dot" />
-                        02 — PLANOS
+                    <span className="zp-eyebrow prices-eyebrow">
+                        <span className="zp-eyebrow-dot" />
+                        03 — PLANOS
                     </span>
                     <h2 className="prices-title">
-                        Escolha o plano certo para <em>você e seu dinheiro</em>
+                        Escolha o plano certo pra <em>você e seu dinheiro</em>
                     </h2>
+                    <p className="prices-sub">
+                        Todo plano começa com 30 dias grátis. Sem cartão, sem pegadinha.
+                    </p>
                 </div>
 
                 {/* --- TOGGLE MENSAL / ANUAL --- */}
@@ -121,16 +124,16 @@ export const Prices = () => {
 
                         <div className="price-block">
                             <span className="currency">R$</span>
-                            <span className="amount">{isAnnual ? fmt(prices.individual.annual) : fmt(prices.individual.monthly)}</span>
-                            <span className="period">{isAnnual ? '/ano' : '/mês'}</span>
+                            <span className="amount">{isAnnual ? fmt(prices.individual.annual / 12) : fmt(prices.individual.monthly)}</span>
+                            <span className="period">/mês</span>
                         </div>
                         <p className="monthly-equivalent">
                             {isAnnual ? (
                                 <>
-                                    equivalente a R$ {fmt(prices.individual.annual / 12)} /mês{' '}
+                                    cobrado anualmente (R$ {fmt(prices.individual.annual)}/ano){' '}
                                     <strong className="save-pct">· economize {individualDiscount}%</strong>
                                 </>
-                            ) : ' '}
+                            ) : 'cobrado mensalmente, cancele quando quiser'}
                         </p>
 
                         <ul className="plan-features">
@@ -140,7 +143,7 @@ export const Prices = () => {
                         </ul>
 
                         <button className="btn-subscribe" onClick={() => handleSubscribe('individual')}>
-                            COMEÇAR 30 DIAS GRÁTIS
+                            Começar 30 dias grátis
                         </button>
                         <p className="trial-disclaimer">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>
@@ -158,16 +161,16 @@ export const Prices = () => {
 
                         <div className="price-block">
                             <span className="currency">R$</span>
-                            <span className="amount">{isAnnual ? fmt(prices.family.annual) : fmt(prices.family.monthly)}</span>
-                            <span className="period">{isAnnual ? '/ano' : '/mês'}</span>
+                            <span className="amount">{isAnnual ? fmt(prices.family.annual / 12) : fmt(prices.family.monthly)}</span>
+                            <span className="period">/mês</span>
                         </div>
                         <p className="monthly-equivalent">
                             {isAnnual ? (
                                 <>
-                                    equivalente a R$ {fmt(prices.family.annual / 12)} /mês{' '}
+                                    cobrado anualmente (R$ {fmt(prices.family.annual)}/ano){' '}
                                     <strong className="save-pct">· economize {familyDiscount}%</strong>
                                 </>
-                            ) : ' '}
+                            ) : 'cobrado mensalmente, cancele quando quiser'}
                         </p>
 
                         <ul className="plan-features">
@@ -177,24 +180,30 @@ export const Prices = () => {
                         </ul>
 
                         <div className="extra-member-box">
-                            <p className="extra-title">MEMBROS EXTRAS <span>(opcional)</span></p>
+                            <p className="extra-title">Membros extras <span>(opcional)</span></p>
                             <div className="member-counter">
                                 <button onClick={() => setExtraMembers(Math.max(0, extraMembers - 1))} aria-label="Remover membro">−</button>
                                 <span>{extraMembers}</span>
                                 <button onClick={() => setExtraMembers(extraMembers + 1)} aria-label="Adicionar membro">+</button>
                             </div>
                             <p className="extra-price">
-                                + R$ {isAnnual ? fmt(prices.extraMember.annual) : fmt(prices.extraMember.monthly)} {isAnnual ? '/ano' : '/mês'} por membro
+                                + R$ {isAnnual ? fmt(prices.extraMember.annual / 12) : fmt(prices.extraMember.monthly)}/mês por pessoa
+                                {isAnnual && ' (cobrado anualmente)'}
                             </p>
                         </div>
 
                         <button className="btn-subscribe btn-subscribe--light" onClick={() => handleSubscribe('family')}>
-                            COMEÇAR 30 DIAS GRÁTIS
+                            Começar 30 dias grátis
                         </button>
                         <p className="trial-disclaimer trial-disclaimer--light">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>
 
                 </div>
+
+                <p className="plans-note">
+                    Menos que um lanche por mês pra nunca mais perguntar "pra onde foi meu
+                    dinheiro?"
+                </p>
             </div>
         </section>
     );

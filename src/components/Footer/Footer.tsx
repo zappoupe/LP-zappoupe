@@ -35,7 +35,8 @@ export const Footer = () => {
                             <h4>Institucional</h4>
                             <ul>
                                 <li><button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Início</button></li>
-                                <li><button onClick={() => scrollToSection('features-section')}>Recursos</button></li>
+                                <li><button onClick={() => scrollToSection('features-section')}>Benefícios</button></li>
+                                <li><button onClick={() => scrollToSection('como-funciona')}>Recursos</button></li>
                                 <li><button onClick={() => scrollToSection('prices-section')}>Planos</button></li>
                                 <li><a href="https://wa.me/5548991882575" target="_blank" rel="noreferrer">Contato</a></li>
                             </ul>

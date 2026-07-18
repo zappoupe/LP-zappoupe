@@ -1,120 +1,128 @@
 // src/components/Faq/Faq.tsx
-import { useState, useEffect, useRef } from "react";
-import IconMobile from "../../assets/mobile.svg";
-import IconPromote from "../../assets/promote.svg";
-import IconMoney from "../../assets/moneys.svg";
-import IconBribe from "../../assets/bribe.svg";
-import IconYesNo from "../../assets/yesno.svg";
-import IconDecree from "../../assets/decree.svg";
-import "./Faq.css";
+import { useId, useState } from 'react';
+import {
+    ShieldCheck,
+    Landmark,
+    Smartphone,
+    MessagesSquare,
+    HelpCircle,
+    Banknote,
+    Undo2,
+    type LucideIcon,
+} from 'lucide-react';
+import { useReveal } from '../../hooks/useReveal';
+import { SECTIONS } from '../../lib/scroll';
+import './Faq.css';
 
 const Chevron = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 
-const FAQ_DATA = [
+interface FaqEntry {
+    Icon: LucideIcon;
+    question: string;
+    answer: string;
+}
+
+const FAQ_DATA: FaqEntry[] = [
     {
-        icon: IconMobile,
-        question: "O ZapPoupe é um aplicativo?",
-        answer: "Não! É um assistente que funciona diretamente no WhatsApp. Sem downloads, sem complicações.",
+        Icon: ShieldCheck,
+        question: 'Meus dados financeiros estão seguros?',
+        answer: 'Sim. Suas conversas são criptografadas pelo próprio WhatsApp, e seus dados ficam armazenados com criptografia e em conformidade com a LGPD. Nunca vendemos ou compartilhamos suas informações — elas são suas, ponto.',
     },
     {
-        icon: IconPromote,
-        question: "Preciso falar com ele todos os dias?",
-        answer: "Não precisa, porém quanto mais você usa o ZapPoupe, mais ele entende seu perfil e cria estratégias financeiras sob medida, ajudando você a economizar e planejar com muito mais clareza.",
+        Icon: Landmark,
+        question: 'Preciso conectar minha conta do banco?',
+        answer: 'Não! O ZapPoupe não pede senha, não acessa sua conta e não se conecta a banco nenhum. Você só conta o que gastou, do seu jeito. Simples e seguro.',
     },
     {
-        icon: IconMoney,
-        question: "E se eu não entender de finanças?",
-        answer: "Fique tranquilo(a)! O ZapPoupe foi feito para te auxiliar em todas as suas dúvidas sobre dinheiro. Ele explica tudo de forma simples, prática e fácil de entender, mesmo que você nunca tenha lidado com finanças antes.",
+        Icon: Smartphone,
+        question: 'O ZapPoupe é um aplicativo?',
+        answer: 'Não! É um assistente que funciona direto no WhatsApp que você já usa. Sem downloads, sem ocupar memória do celular, sem mais um app pra esquecer.',
     },
     {
-        icon: IconYesNo,
-        question: "Como eu informo meus gastos e receitas?",
-        answer: "Você pode mandar mensagens de texto, áudios ou até fotos das notas fiscais. O ZapPoupe entende tudo e registra para você.",
+        Icon: MessagesSquare,
+        question: 'Preciso falar com ele todos os dias?',
+        answer: 'Não. Você manda mensagem quando quiser — na hora do gasto ou tudo de uma vez no fim do dia. E ele também te procura: lembretes de contas e resumos chegam sozinhos.',
     },
     {
-        icon: IconBribe,
-        question: "O ZapPoupe funciona para quem tem renda variável ou informal?",
-        answer: "Com certeza! Ele foi feito para se adaptar à sua realidade, seja salário fixo, renda informal ou até quem vive de freelas.",
+        Icon: HelpCircle,
+        question: 'E se eu não entender nada de finanças?',
+        answer: 'Melhor ainda — é exatamente pra você. Nada de jargão ou gráfico complicado: o ZapPoupe fala a sua língua e te mostra o essencial, um passo de cada vez.',
     },
     {
-        icon: IconDecree,
-        question: "O ZapPoupe me ajuda a economizar de verdade?",
-        answer: "Sim! Além de mostrar para onde o dinheiro está indo, ele te envia sugestões personalizadas para reduzir gastos e melhorar sua saúde financeira.",
+        Icon: Banknote,
+        question: 'Funciona pra quem tem renda variável ou informal?',
+        answer: 'Funciona muito bem. Você registra entradas e saídas conforme acontecem, e o ZapPoupe monta o retrato real do seu mês — mesmo que nenhum mês seja igual ao outro.',
+    },
+    {
+        Icon: Undo2,
+        question: 'E se eu não gostar? Como cancelo?',
+        answer: 'Você cancela direto na conversa do WhatsApp, sem ligação e sem formulário. Não tem fidelidade nem multa. Nos primeiros 30 dias você não paga nada de qualquer forma — e se decidir cancelar depois, é só avisar por lá que a gente resolve com você.',
     },
 ];
 
 export const Faq = () => {
-    const [openIndex, setOpenIndex] = useState<number | null>(0);
-    const [visible, setVisible] = useState(false);
-    const sectionRef = useRef<HTMLElement | null>(null);
+    // No HTML todas começam fechadas — o primeiro clique é do usuário.
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const { ref, visible } = useReveal<HTMLElement>();
+    const baseId = useId();
 
-    useEffect(() => {
-        const el = sectionRef.current;
-        if (!el) return;
-        const obs = new IntersectionObserver(
-            (entries) => {
-                if (entries[0]?.isIntersecting) {
-                    setVisible(true);
-                    obs.disconnect();
-                }
-            },
-            { threshold: 0.12 },
-        );
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, []);
-
-    const toggleFaq = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
+    const toggleFaq = (index: number) => setOpenIndex(openIndex === index ? null : index);
 
     return (
-        <section ref={sectionRef} className={`faq-section ${visible ? "is-visible" : ""}`} id="faq-section">
-            <div className="faq-blob faq-blob--1" aria-hidden="true" />
-            <div className="faq-blob faq-blob--2" aria-hidden="true" />
+        <section
+            ref={ref}
+            id={SECTIONS.faq}
+            className={`faq-section zp-section ${visible ? 'is-visible' : ''}`}
+        >
+            <div className="zp-container">
+                <h2 className="zp-title zp-reveal">Perguntas frequentes</h2>
+                <p className="zp-sub zp-reveal">
+                    É normal ter dúvidas antes do primeiro passo. Essas são as mais comuns:
+                </p>
 
-            <div className="faq-inner">
-                {/* Lado esquerdo */}
-                <div className="faq-left">
-                    <span className="faq-eyebrow">
-                        <span className="faq-eyebrow-dot" />
-                        03 — DÚVIDAS
-                    </span>
-                    <h2 className="faq-title">
-                        Perguntas <em>frequentes</em>
-                    </h2>
-                    <p className="faq-description">
-                        É super normal ter algumas perguntas antes de dar o primeiro passo.
-                        Separamos as dúvidas mais comuns de quem está prestes a transformar a
-                        vida financeira. Dá uma olhadinha!
-                    </p>
-                </div>
-
-                {/* Lado direito: acordeão */}
-                <div className="faq-list">
+                <div className="faq-wrap">
                     {FAQ_DATA.map((item, index) => {
                         const isOpen = openIndex === index;
+                        const btnId = `${baseId}-q${index}`;
+                        const panelId = `${baseId}-a${index}`;
+
                         return (
                             <div
-                                key={index}
-                                className={`faq-item ${isOpen ? "open" : ""}`}
-                                style={{ transitionDelay: `${0.1 + index * 0.07}s` }}
+                                key={item.question}
+                                className={`faq-item zp-reveal ${isOpen ? 'open' : ''}`}
+                                style={{ transitionDelay: `${0.05 * index}s` }}
                             >
-                                <button className="faq-item-header" onClick={() => toggleFaq(index)}>
-                                    <span className="faq-icon-wrap">
-                                        <img className="faq-icon" alt="" src={item.icon} />
+                                <button
+                                    className="faq-q"
+                                    id={btnId}
+                                    onClick={() => toggleFaq(index)}
+                                    aria-expanded={isOpen}
+                                    aria-controls={panelId}
+                                >
+                                    <span className="faq-q-text">
+                                        <span className="faq-icon">
+                                            <item.Icon size={19} strokeWidth={2} aria-hidden="true" />
+                                        </span>
+                                        {item.question}
                                     </span>
-                                    <span className="faq-question">{item.question}</span>
-                                    <span className="faq-chevron"><Chevron /></span>
+                                    <span className="faq-arrow"><Chevron /></span>
                                 </button>
 
-                                <div className="faq-item-body">
-                                    <div className="faq-item-body-inner">
-                                        <p className="faq-answer">{item.answer}</p>
+                                <div
+                                    className="faq-a"
+                                    id={panelId}
+                                    role="region"
+                                    aria-labelledby={btnId}
+                                    /* inert em vez de hidden: tira do foco e do leitor de
+                                       tela sem virar display:none, que mataria a animação */
+                                    inert={!isOpen}
+                                >
+                                    <div className="faq-a-inner">
+                                        <p>{item.answer}</p>
                                     </div>
                                 </div>
                             </div>

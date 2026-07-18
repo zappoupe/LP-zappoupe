@@ -1,4 +1,15 @@
 /* src/pages/Success/Success.css */
+
+/* Variantes de estado do retorno do Stripe (falha / em análise).
+   Seletor com dois níveis de propósito: vence .success-title por
+   especificidade, independente da ordem das regras no arquivo. */
+.success-card .success-title--error {
+    color: #C4442E;
+}
+
+.success-card .success-title--pending {
+    color: #A9761A;
+}
 .success-section {
     width: 100vw;
     min-height: 100vh;

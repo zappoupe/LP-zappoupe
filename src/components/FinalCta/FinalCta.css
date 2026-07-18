@@ -1,0 +1,52 @@
+/* src/components/FinalCta/FinalCta.css */
+
+.finalcta {
+    background: var(--zp-ink);
+    color: #fff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.finalcta::before {
+    content: "";
+    position: absolute;
+    bottom: -40%;
+    left: 50%;
+    width: 720px;
+    height: 480px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(37, 211, 102, .2), transparent 68%);
+    pointer-events: none;
+}
+
+.finalcta .zp-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.finalcta h2 {
+    font-family: var(--zp-font-display);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+    line-height: 1.16;
+    letter-spacing: -.015em;
+    max-width: 24ch;
+    margin-bottom: 14px;
+    text-wrap: balance;
+}
+
+.finalcta p {
+    color: rgba(255, 255, 255, .78);
+    font-size: var(--zp-text-lg);
+    line-height: 1.6;
+    max-width: 40ch;
+    margin-bottom: 32px;
+    text-wrap: pretty;
+}
+
+.finalcta .zp-cta {
+    box-shadow: 0 6px 24px rgba(37, 211, 102, .42);
+}
