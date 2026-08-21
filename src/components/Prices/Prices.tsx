@@ -91,7 +91,7 @@ export const Prices = () => {
                         Escolha o plano certo pra <em>você e seu dinheiro</em>
                     </h2>
                     <p className="prices-sub">
-                        Todo plano começa com 30 dias grátis. Sem cartão, sem pegadinha.
+                        Todo plano começa com 7 dias grátis. Sem cartão, sem pegadinha.
                     </p>
                 </div>
 
@@ -119,7 +119,7 @@ export const Prices = () => {
                                 <h3 className="plan-name">Individual</h3>
                                 <p className="plan-tagline">Crescimento pessoal</p>
                             </div>
-                            <span className="trial-badge">30 DIAS GRÁTIS</span>
+                            <span className="trial-badge">7 DIAS GRÁTIS</span>
                         </div>
 
                         <div className="price-block">
@@ -143,7 +143,7 @@ export const Prices = () => {
                         </ul>
 
                         <button className="btn-subscribe" onClick={() => handleSubscribe('individual')}>
-                            Começar 30 dias grátis
+                            Começar 7 dias grátis
                         </button>
                         <p className="trial-disclaimer">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>
@@ -156,7 +156,7 @@ export const Prices = () => {
                                 <h3 className="plan-name">Família</h3>
                                 <p className="plan-tagline">Prosperidade conjunta</p>
                             </div>
-                            <span className="trial-badge">30 DIAS GRÁTIS</span>
+                            <span className="trial-badge">7 DIAS GRÁTIS</span>
                         </div>
 
                         <div className="price-block">
@@ -193,7 +193,7 @@ export const Prices = () => {
                         </div>
 
                         <button className="btn-subscribe btn-subscribe--light" onClick={() => handleSubscribe('family')}>
-                            Começar 30 dias grátis
+                            Começar 7 dias grátis
                         </button>
                         <p className="trial-disclaimer trial-disclaimer--light">Sem cobrança hoje. Cancele quando quiser durante o período gratuito.</p>
                     </div>

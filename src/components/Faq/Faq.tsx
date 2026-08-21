@@ -60,7 +60,7 @@ const FAQ_DATA: FaqEntry[] = [
     {
         Icon: Undo2,
         question: 'E se eu não gostar? Como cancelo?',
-        answer: 'Você cancela direto na conversa do WhatsApp, sem ligação e sem formulário. Não tem fidelidade nem multa. Nos primeiros 30 dias você não paga nada de qualquer forma — e se decidir cancelar depois, é só avisar por lá que a gente resolve com você.',
+        answer: 'Você cancela direto na conversa do WhatsApp, sem ligação e sem formulário. Não tem fidelidade nem multa. Nos primeiros 7 dias você não paga nada de qualquer forma — e se decidir cancelar depois, é só avisar por lá que a gente resolve com você.',
     },
 ];
 

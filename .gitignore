@@ -25,3 +25,9 @@ dist-ssr
 
 
 .env
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+
+# Lockfile gerado pelo `deno check` local; o deploy do Supabase nao usa
+deno.lock

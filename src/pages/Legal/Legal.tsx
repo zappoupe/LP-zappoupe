@@ -71,7 +71,7 @@ export const PrivacyPolicy = () => (
                 body: [
                     "Dados de cadastro: nome, e-mail e número de telefone (WhatsApp), informados por você no momento da contratação.",
                     "Dados financeiros que você registra: descrições de gastos e receitas, valores, categorias, lembretes e metas que você envia ao assistente por texto, áudio ou imagem.",
-                    "Dados de pagamento: processados diretamente pela Stripe. Não armazenamos os dados completos do seu cartão em nossos servidores.",
+                    "Dados de pagamento: processados diretamente pelo Asaas. Não armazenamos os dados completos do seu cartão em nossos servidores.",
                     "Dados de uso: registros técnicos de interação com o assistente, necessários para o funcionamento e melhoria do serviço.",
                 ],
             },
@@ -85,7 +85,7 @@ export const PrivacyPolicy = () => (
             {
                 heading: "Compartilhamento com terceiros",
                 body: [
-                    "Para operar o serviço, compartilhamos dados estritamente necessários com provedores de tecnologia: Stripe (processamento de pagamentos), provedores de mensageria do WhatsApp (envio e recebimento de mensagens), Supabase (armazenamento de dados) e provedores de inteligência artificial (interpretação das suas mensagens).",
+                    "Para operar o serviço, compartilhamos dados estritamente necessários com provedores de tecnologia: Asaas (processamento de pagamentos), provedores de mensageria do WhatsApp (envio e recebimento de mensagens), Supabase (armazenamento de dados) e provedores de inteligência artificial (interpretação das suas mensagens).",
                     "Esses parceiros tratam os dados apenas conforme nossas instruções e suas próprias políticas de segurança.",
                 ],
             },
@@ -152,7 +152,7 @@ export const TermsOfUse = () => (
             {
                 heading: "Planos, pagamento e teste grátis",
                 body: [
-                    "Oferecemos planos Individual e Família, com cobrança mensal ou anual, processada pela Stripe. Novas assinaturas incluem um período de teste de 30 dias, sem cobrança no ato da contratação.",
+                    "Oferecemos planos Individual e Família, com cobrança mensal ou anual, processada pelo Asaas. Novas assinaturas incluem um período de teste de 7 dias, sem cobrança no ato da contratação.",
                     "Após o período de teste, a cobrança é realizada automaticamente conforme o plano escolhido, renovando-se de forma recorrente até o cancelamento.",
                 ],
             },

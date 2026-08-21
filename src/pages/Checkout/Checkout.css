@@ -361,3 +361,46 @@
     .checkout-card { max-height: 92vh; }
     .co-summary, .co-form-wrap { overflow-y: auto; }
 }
+
+/* ── Seletor de forma de pagamento ───────────────────────────────────── */
+.co-metodos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.co-metodo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(53, 88, 36, 0.18);
+    background: #fbfdf7;
+    color: var(--zp-green-dark);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.co-metodo:hover { border-color: rgba(137, 179, 33, 0.55); }
+.co-metodo strong { font-size: 14px; font-weight: 700; }
+.co-metodo span { font-size: 12px; color: #7d9270; font-weight: 600; }
+.co-metodo svg { color: var(--zp-green-dark); opacity: 0.75; }
+.co-metodo.active {
+    border-color: var(--zp-lime);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(137, 179, 33, 0.16);
+}
+.co-metodo.active svg { opacity: 1; color: var(--zp-lime); }
+
+.co-hint {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7d9270;
+    line-height: 1.45;
+}
+
+@media (max-width: 480px) {
+    .co-metodos { grid-template-columns: 1fr; }
+}

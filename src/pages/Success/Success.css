@@ -1,14 +1,12 @@
 /* src/pages/Success/Success.css */
 
-/* Variantes de estado do retorno do Stripe (falha / em análise).
+/* Variante de falha no retorno do gateway.
    Seletor com dois níveis de propósito: vence .success-title por
-   especificidade, independente da ordem das regras no arquivo. */
+   especificidade, independente da ordem das regras no arquivo.
+   O estado "em análise" saiu junto com o Stripe: no Asaas o cartão é
+   confirmado na página dele e o PIX não cobra nada no ato. */
 .success-card .success-title--error {
     color: #C4442E;
-}
-
-.success-card .success-title--pending {
-    color: #A9761A;
 }
 .success-section {
     width: 100vw;

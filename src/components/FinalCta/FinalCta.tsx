@@ -8,7 +8,7 @@ export const FinalCta = () => (
         <div className="zp-container">
             <h2>Seu próximo gasto já pode ser o primeiro organizado.</h2>
             <p>
-                30 dias grátis. Sem cartão. Sem fidelidade — cancele quando quiser, direto na
+                7 dias grátis. Sem cartão. Sem fidelidade — cancele quando quiser, direto na
                 conversa.
             </p>
             <button className="zp-cta" onClick={goToPlans}>

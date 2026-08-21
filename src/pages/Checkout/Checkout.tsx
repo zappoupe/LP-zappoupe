@@ -2,17 +2,12 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './Checkout.css';
 
-const stripePubKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || '';
 const supabaseFunctionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-const stripePromise = loadStripe(stripePubKey);
-
-type PaymentMode = 'setup' | 'payment';
+type Metodo = 'CREDIT_CARD' | 'PIX';
 
 const Check = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -27,50 +22,19 @@ const LockIcon = () => (
     </svg>
 );
 
-interface StripeFormProps {
-    name: string;
-    email: string;
-    phone: string;
-    mode: PaymentMode;
-}
+const CardIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="5" width="20" height="14" rx="2.5" stroke="currentColor" strokeWidth="2" />
+        <path d="M2 10h20" stroke="currentColor" strokeWidth="2" />
+    </svg>
+);
 
-const StripeForm = ({ name, email, phone, mode }: StripeFormProps) => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-
-        setIsLoading(true);
-
-        const confirmParams = {
-            return_url: `${window.location.origin}/sucesso`,
-            payment_method_data: {
-                billing_details: { name, email, phone }
-            }
-        };
-
-        const { error } = mode === 'setup'
-            ? await stripe.confirmSetup({ elements, confirmParams })
-            : await stripe.confirmPayment({ elements, confirmParams: { ...confirmParams, receipt_email: email } });
-
-        if (error) {
-            alert(error.message);
-        }
-        setIsLoading(false);
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="co-form">
-            <PaymentElement />
-            <button type="submit" className="co-submit" disabled={isLoading || !stripe || !elements}>
-                {isLoading ? 'PROCESSANDO...' : 'INICIAR 30 DIAS GRÁTIS'}
-            </button>
-        </form>
-    );
-};
+const PixIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3.2 20.8 12 12 20.8 3.2 12z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M8.4 8.4 12 12l3.6-3.6M8.4 15.6 12 12l3.6 3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
 export const Checkout = () => {
     const location = useLocation();
@@ -85,14 +49,17 @@ export const Checkout = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [cpf, setCpf] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [metodo, setMetodo] = useState<Metodo>('CREDIT_CARD');
 
-    const [clientSecret, setClientSecret] = useState<string>('');
-    const [mode, setMode] = useState<PaymentMode>('setup');
-    const [isCreatingSession, setIsCreatingSession] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [sessionError, setSessionError] = useState('');
 
+    /* Os valores abaixo são só para exibição. Quem calcula o que será cobrado
+       é a Edge Function, a partir do plano — nunca este arquivo. Editar o
+       preço aqui no devtools não muda um centavo da cobrança. */
     const prices = {
         individual: { annual: 197.90, monthly: 39.90 },
         family: { annual: 397.90, monthly: 59.90 },
@@ -137,7 +104,16 @@ export const Checkout = () => {
         setPhone(value);
     };
 
-    const handleContinue = async (e: React.FormEvent) => {
+    const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const d = e.target.value.replace(/\D/g, '').slice(0, 11);
+        let value = d;
+        if (d.length > 9) value = `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+        else if (d.length > 6) value = `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+        else if (d.length > 3) value = `${d.slice(0, 3)}.${d.slice(3)}`;
+        setCpf(value);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSessionError('');
 
@@ -147,6 +123,16 @@ export const Checkout = () => {
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
             setSessionError('E-mail inválido.');
+            return;
+        }
+        if (phone.replace(/\D/g, '').length < 10) {
+            setSessionError('Celular inválido. Informe DDD + número.');
+            return;
+        }
+        /* No cartão, o CPF é pedido pelo Asaas na página de pagamento.
+           No PIX somos nós que criamos o cliente lá, então precisa vir daqui. */
+        if (metodo === 'PIX' && cpf.replace(/\D/g, '').length !== 11) {
+            setSessionError('Informe um CPF válido para pagar com PIX.');
             return;
         }
         if (password.length < 6) {
@@ -162,10 +148,10 @@ export const Checkout = () => {
             return;
         }
 
-        setIsCreatingSession(true);
+        setIsSubmitting(true);
 
         try {
-            const res = await fetch(`${supabaseFunctionsUrl}/checkout-session`, {
+            const res = await fetch(`${supabaseFunctionsUrl}/checkout-asaas`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -179,22 +165,27 @@ export const Checkout = () => {
                     email: email.trim().toLowerCase(),
                     name: name.trim(),
                     phone: phone.trim(),
+                    cpfCnpj: cpf.replace(/\D/g, ''),
                     password,
+                    metodo,
                 }),
             });
 
             const data = await res.json();
 
-            if (data.clientSecret) {
-                setClientSecret(data.clientSecret);
-                setMode(data.mode || 'setup');
-            } else {
-                setSessionError(data.error || 'Não foi possível iniciar o pagamento.');
+            if (data.redirectUrl) {
+                /* Daqui em diante quem manda é o Asaas: no cartão é a página
+                   de checkout dele, no PIX é a fatura com o QR Code. A conta
+                   só é liberada quando o webhook confirma. */
+                window.location.href = data.redirectUrl;
+                return;
             }
+
+            setSessionError(data.error || 'Não foi possível iniciar o pagamento.');
         } catch {
             setSessionError('Erro de comunicação. Verifique sua conexão e tente novamente.');
         } finally {
-            setIsCreatingSession(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -219,16 +210,16 @@ export const Checkout = () => {
                     <div className="co-trial">
                         <span className="co-trial-badge">
                             <Sparkles size={14} strokeWidth={2.2} aria-hidden="true" />
-                            30 DIAS GRÁTIS
+                            7 DIAS GRÁTIS
                         </span>
-                        <p>Você não será cobrado hoje. A primeira cobrança acontece apenas após os 30 dias de teste — cancele quando quiser.</p>
+                        <p>Você não será cobrado hoje. A primeira cobrança acontece apenas após os 7 dias de teste — cancele quando quiser.</p>
                     </div>
 
                     <div className="co-toggle">
                         <span className={!isAnnual ? "active" : ""}>Mensal</span>
                         <button
                             className="co-toggle-switch"
-                            onClick={() => !clientSecret && setIsAnnual(!isAnnual)}
+                            onClick={() => setIsAnnual(!isAnnual)}
                             aria-label="Alternar mensal/anual"
                         >
                             <span className={`co-toggle-knob ${isAnnual ? "annual" : "monthly"}`} />
@@ -249,9 +240,9 @@ export const Checkout = () => {
                                 <span>+ R$ {isAnnual ? fmt(prices.extraMember.annual) : fmt(prices.extraMember.monthly)} {periodText} por pessoa</span>
                             </div>
                             <div className="co-members-counter">
-                                <button onClick={() => !clientSecret && setExtraMembers(Math.max(0, extraMembers - 1))} aria-label="Remover">−</button>
+                                <button onClick={() => setExtraMembers(Math.max(0, extraMembers - 1))} aria-label="Remover">−</button>
                                 <span>{extraMembers}</span>
-                                <button onClick={() => !clientSecret && setExtraMembers(extraMembers + 1)} aria-label="Adicionar">+</button>
+                                <button onClick={() => setExtraMembers(extraMembers + 1)} aria-label="Adicionar">+</button>
                             </div>
                         </div>
                     )}
@@ -270,54 +261,91 @@ export const Checkout = () => {
                             <span className="co-lock"><LockIcon /></span>
                             Pagamento Seguro
                         </h1>
-                        <p>
-                            {clientSecret
-                                ? 'Adicione os dados do cartão para iniciar seus 30 dias grátis.'
-                                : 'Preencha seus dados para iniciar sua assinatura.'}
-                        </p>
+                        <p>Preencha seus dados para iniciar sua assinatura.</p>
                     </div>
 
-                    {!clientSecret ? (
-                        <form onSubmit={handleContinue} className="co-form">
+                    <form onSubmit={handleSubmit} className="co-form">
+                        <div className="co-field">
+                            <label>Nome completo *</label>
+                            <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="João da Silva" />
+                        </div>
+
+                        <div className="co-field">
+                            <label>E-mail de acesso *</label>
+                            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
+                        </div>
+
+                        <div className="co-field">
+                            <label>Celular (WhatsApp) *</label>
+                            <input type="tel" required value={phone} onChange={handlePhoneChange} placeholder="(11) 99999-9999" />
+                        </div>
+
+                        <div className="co-field">
+                            <label>Como você prefere pagar? *</label>
+                            <div className="co-metodos" role="radiogroup" aria-label="Forma de pagamento">
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={metodo === 'CREDIT_CARD'}
+                                    className={`co-metodo ${metodo === 'CREDIT_CARD' ? 'active' : ''}`}
+                                    onClick={() => setMetodo('CREDIT_CARD')}
+                                >
+                                    <CardIcon />
+                                    <strong>Cartão de crédito</strong>
+                                    <span>Renova sozinho</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={metodo === 'PIX'}
+                                    className={`co-metodo ${metodo === 'PIX' ? 'active' : ''}`}
+                                    onClick={() => setMetodo('PIX')}
+                                >
+                                    <PixIcon />
+                                    <strong>PIX</strong>
+                                    <span>Você paga a cada ciclo</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {metodo === 'PIX' && (
                             <div className="co-field">
-                                <label>Nome completo *</label>
-                                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="João da Silva" />
+                                <label>CPF *</label>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    required
+                                    value={cpf}
+                                    onChange={handleCpfChange}
+                                    placeholder="000.000.000-00"
+                                />
+                                <span className="co-hint">
+                                    Ao final dos 7 dias você recebe um PIX de R$ {fmt(finalPrice)} para renovar.
+                                </span>
                             </div>
+                        )}
 
+                        <div className="co-field-row">
                             <div className="co-field">
-                                <label>E-mail de acesso *</label>
-                                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
+                                <label>Crie sua senha *</label>
+                                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
                             </div>
-
                             <div className="co-field">
-                                <label>Celular (WhatsApp) *</label>
-                                <input type="tel" required value={phone} onChange={handlePhoneChange} placeholder="(11) 99999-9999" />
+                                <label>Confirme sua senha *</label>
+                                <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" autoComplete="new-password" />
                             </div>
+                        </div>
 
-                            <div className="co-field-row">
-                                <div className="co-field">
-                                    <label>Crie sua senha *</label>
-                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
-                                </div>
-                                <div className="co-field">
-                                    <label>Confirme sua senha *</label>
-                                    <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" autoComplete="new-password" />
-                                </div>
-                            </div>
+                        {sessionError && <p className="co-error">{sessionError}</p>}
 
-                            {sessionError && <p className="co-error">{sessionError}</p>}
+                        <button type="submit" className="co-submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'PREPARANDO...' : 'CONTINUAR PARA O PAGAMENTO'}
+                        </button>
 
-                            <button type="submit" className="co-submit" disabled={isCreatingSession}>
-                                {isCreatingSession ? 'PREPARANDO...' : 'CONTINUAR PARA O PAGAMENTO'}
-                            </button>
-
-                            <p className="co-secure-note"><LockIcon /> Seus dados são protegidos e o pagamento é processado pela Stripe.</p>
-                        </form>
-                    ) : (
-                        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                            <StripeForm name={name} email={email} phone={phone} mode={mode} />
-                        </Elements>
-                    )}
+                        <p className="co-secure-note">
+                            <LockIcon /> Seus dados são protegidos e o pagamento é processado pelo Asaas.
+                        </p>
+                    </form>
                 </div>
             </div>
         </section>

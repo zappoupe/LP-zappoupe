@@ -1,0 +1,298 @@
+// Substitui a stripe-webhook. E o UNICO lugar do sistema que pode liberar ou
+// cortar acesso — o checkout nunca ativa nada.
+//
+// Duas correcoes deliberadas em relacao a versao do Stripe:
+//
+// 1. O Stripe liberava a conta ao receber invoice.paid da fatura de R$ 0,00 do
+//    trial, o que ativava quem nunca cadastrou cartao. Aqui a liberacao exige
+//    CHECKOUT_PAID (cartao capturado) ou pagamento realmente confirmado.
+//
+// 2. deactivateByCustomer desativava por customer_id em qualquer falha, sem
+//    olhar periodo pago — foi assim que um cliente de plano ANUAL, em dia,
+//    perdeu acesso. Agora todo corte consulta acesso_ate: enquanto o periodo
+//    pago nao venceu, nenhum evento derruba a conta.
+
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
+import { asaas, DIAS_CARENCIA, TRIAL_DAYS } from '../_shared/asaas.ts'
+
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+)
+
+const WEBHOOK_TOKEN = Deno.env.get('ASAAS_WEBHOOK_TOKEN') ?? ''
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    headers: { 'Content-Type': 'application/json' },
+    status,
+  })
+}
+
+/** Soma um ciclo a partir de hoje: define ate quando o acesso esta pago. */
+function fimDoPeriodo(isAnual: boolean, base = new Date()): string {
+  const d = new Date(base)
+  if (isAnual) d.setUTCFullYear(d.getUTCFullYear() + 1)
+  else d.setUTCMonth(d.getUTCMonth() + 1)
+  return d.toISOString()
+}
+
+function emDias(dias: number, base = new Date()): string {
+  const d = new Date(base)
+  d.setUTCDate(d.getUTCDate() + dias)
+  return d.toISOString()
+}
+
+/**
+ * Descobre de quem e o evento.
+ *
+ * Duas descobertas do teste real com cartao moldaram esta funcao:
+ *
+ * 1. O Asaas NAO propaga o externalReference da sessao de checkout para a
+ *    assinatura que ele cria a partir dela. So o evento CHECKOUT_PAID traz o
+ *    nosso user_id; SUBSCRIPTION_CREATED e os PAYMENT_* chegam sem ele.
+ *
+ * 2. NAO da pra cair no e-mail. No checkout hospedado quem digita os dados e
+ *    o cliente, na pagina do Asaas — ele pode (e vai) usar um e-mail
+ *    diferente do que cadastrou na nossa conta. Casar por e-mail liberaria
+ *    acesso pra pessoa errada.
+ *
+ * O elo que sempre existe e o checkoutSession: ele vem preenchido na
+ * assinatura e em toda cobranca gerada, e nos ja gravamos esse id em
+ * asaas_checkout_id quando abrimos a sessao.
+ *
+ * Devolve null quando nao da pra ter certeza — ignorar o evento e sempre
+ * melhor do que mexer na assinatura de outra pessoa.
+ */
+async function resolverUserId(obj: any): Promise<string | null> {
+  const porColuna = async (coluna: string, valor: string) => {
+    const { data } = await supabaseAdmin.from('assinaturas')
+      .select('id').eq(coluna, valor).maybeSingle()
+    return data?.id ?? null
+  }
+
+  // 1. externalReference — so o CHECKOUT_PAID e o fluxo PIX trazem.
+  const ref = obj?.externalReference
+  if (ref && /^[0-9a-f-]{36}$/i.test(String(ref))) return String(ref)
+
+  // 2. checkoutSession — o elo do fluxo de cartao.
+  const sessao = typeof obj?.checkoutSession === 'string'
+    ? obj.checkoutSession
+    : obj?.checkoutSession?.id
+  if (sessao) {
+    const id = await porColuna('asaas_checkout_id', String(sessao))
+    if (id) return id
+  }
+
+  // 3. ids que ja vinculamos em eventos anteriores.
+  const subId = obj?.subscription ?? obj?.id
+  if (subId && String(subId).startsWith('sub_')) {
+    const id = await porColuna('asaas_subscription_id', String(subId))
+    if (id) return id
+  }
+
+  const custId = typeof obj?.customer === 'string' ? obj.customer : obj?.customer?.id
+  if (custId) {
+    const id = await porColuna('asaas_customer_id', String(custId))
+    if (id) return id
+  }
+
+  return null
+}
+
+async function lerAssinatura(userId: string) {
+  const { data } = await supabaseAdmin.from('assinaturas')
+    .select('id, is_anual, plano, acesso_ate, status, asaas_customer_id, asaas_subscription_id')
+    .eq('id', userId).maybeSingle()
+  return data
+}
+
+/** Cartao capturado no checkout hospedado: comeca o periodo de teste. */
+async function iniciarTrial(userId: string, checkout: any) {
+  const assinatura = await lerAssinatura(userId)
+  if (!assinatura) return { skipped: 'assinatura_inexistente' }
+
+  const patch: Record<string, unknown> = { ativo: true, status: 'trialing' }
+
+  // acesso_ate ja foi gravado pelo checkout-asaas com a data exata do fim do
+  // trial. NAO recalcular a partir do payload: o Asaas devolve o nextDueDate
+  // da assinatura ja avancado um ciclo (criamos pra 19/09 e ele responde
+  // 19/10), o que daria 60 dias de acesso gratis em vez de 30.
+  if (!assinatura.acesso_ate) {
+    patch.acesso_ate = checkout?.subscription?.nextDueDate
+      ? new Date(checkout.subscription.nextDueDate).toISOString()
+      : emDias(TRIAL_DAYS)
+  }
+
+  const custId = typeof checkout?.customer === 'string' ? checkout.customer : checkout?.customer?.id
+  if (custId) patch.asaas_customer_id = custId
+
+  await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+  return { ok: true, status: 'trialing' }
+}
+
+/** Pagamento confirmado de verdade: renova o periodo pago. */
+async function confirmarPagamento(userId: string, pagamento: any) {
+  const assinatura = await lerAssinatura(userId)
+  if (!assinatura) return { skipped: 'assinatura_inexistente' }
+
+  const valor = Number(pagamento?.value ?? 0)
+
+  const patch: Record<string, unknown> = {
+    ativo: true,
+    status: 'active',
+    acesso_ate: fimDoPeriodo(!!assinatura.is_anual),
+  }
+  const custId = typeof pagamento?.customer === 'string' ? pagamento.customer : pagamento?.customer?.id
+  if (custId) patch.asaas_customer_id = custId
+  if (pagamento?.subscription) patch.asaas_subscription_id = pagamento.subscription
+
+  await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+
+  // Extrato so recebe dinheiro que entrou. A versao do Stripe gravava as
+  // faturas de R$ 0,00 do trial e por isso 54 das 57 linhas eram zeradas.
+  if (valor > 0 && pagamento?.id) {
+    const { error } = await supabaseAdmin.from('extrato').upsert({
+      user_id: userId,
+      valor,
+      plano: assinatura.plano,
+      asaas_payment_id: pagamento.id,
+      data_pagamento: pagamento?.paymentDate ?? pagamento?.clientPaymentDate ?? new Date().toISOString(),
+    }, { onConflict: 'asaas_payment_id' })
+    if (error) console.error('Falha ao gravar extrato:', error.message)
+  }
+
+  return { ok: true, status: 'active', valor }
+}
+
+/**
+ * Corte de acesso. So derruba quem realmente nao tem periodo pago valido.
+ * `motivo` vira o status; `imediato` pula a carencia (estorno/chargeback).
+ */
+async function cortarAcesso(userId: string, motivo: string, imediato = false) {
+  const assinatura = await lerAssinatura(userId)
+  if (!assinatura) return { skipped: 'assinatura_inexistente' }
+
+  if (!imediato && assinatura.acesso_ate) {
+    const limite = new Date(assinatura.acesso_ate)
+    limite.setUTCDate(limite.getUTCDate() + DIAS_CARENCIA)
+    if (limite > new Date()) {
+      // Periodo pago ainda de pe: marca a pendencia mas NAO tira o acesso.
+      await supabaseAdmin.from('assinaturas').update({ status: motivo }).eq('id', userId)
+      return { ok: true, mantido: true, acesso_ate: assinatura.acesso_ate }
+    }
+  }
+
+  await supabaseAdmin.from('assinaturas')
+    .update({ ativo: false, status: motivo })
+    .eq('id', userId)
+  return { ok: true, cortado: true }
+}
+
+serve(async (req) => {
+  // O Asaas nao assina o corpo como o Stripe: a autenticacao e um token fixo
+  // que configuramos junto com a URL do webhook.
+  const token = req.headers.get('asaas-access-token') ?? ''
+  if (!WEBHOOK_TOKEN || token !== WEBHOOK_TOKEN) {
+    console.error('Webhook recusado: token invalido.')
+    return json({ error: 'unauthorized' }, 401)
+  }
+
+  let evento: any
+  try {
+    evento = await req.json()
+  } catch {
+    return json({ error: 'payload invalido' }, 400)
+  }
+
+  const tipo: string = evento?.event ?? ''
+  const pagamento = evento?.payment
+  const checkout = evento?.checkout ?? evento?.checkoutSession
+  const assinatura = evento?.subscription
+
+  const alvo = pagamento ?? checkout ?? assinatura
+  if (!alvo) return json({ received: true, ignorado: tipo, motivo: 'sem objeto' })
+
+  try {
+    const userId = await resolverUserId(alvo)
+    if (!userId) {
+      // Nao e erro: pode ser cobranca avulsa criada no painel do Asaas.
+      console.warn(`Evento ${tipo} sem user_id resolvivel.`)
+      return json({ received: true, ignorado: tipo, motivo: 'user_id_nao_resolvido' })
+    }
+
+    switch (tipo) {
+      case 'CHECKOUT_PAID':
+        return json({ received: true, ...(await iniciarTrial(userId, checkout)) })
+
+      case 'PAYMENT_CONFIRMED':
+      case 'PAYMENT_RECEIVED':
+        return json({ received: true, ...(await confirmarPagamento(userId, pagamento)) })
+
+      case 'PAYMENT_OVERDUE':
+        return json({ received: true, ...(await cortarAcesso(userId, 'past_due')) })
+
+      case 'PAYMENT_CREDIT_CARD_CAPTURE_REFUSED':
+        return json({ received: true, ...(await cortarAcesso(userId, 'past_due')) })
+
+      case 'PAYMENT_REFUNDED':
+      case 'PAYMENT_CHARGEBACK_REQUESTED':
+        return json({ received: true, ...(await cortarAcesso(userId, 'refunded', true)) })
+
+      case 'SUBSCRIPTION_CREATED':
+      case 'SUBSCRIPTION_UPDATED': {
+        // Guarda o id da assinatura — sem ele o cancelamento vira mentira:
+        // marcaria cancelado no nosso banco enquanto o Asaas seguiria cobrando.
+        const patch: Record<string, unknown> = { asaas_subscription_id: assinatura?.id }
+        const custId = typeof assinatura?.customer === 'string'
+          ? assinatura.customer : assinatura?.customer?.id
+        if (custId) patch.asaas_customer_id = custId
+        await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+
+        // Carimba o nosso user_id na assinatura la no Asaas. Ela nasce sem
+        // externalReference quando vem do checkout hospedado, e sem isso todo
+        // evento futuro dependeria da cadeia checkoutSession. Com o carimbo,
+        // os PAYMENT_* seguintes resolvem direto pelo caminho 1.
+        if (assinatura?.id && !assinatura?.externalReference) {
+          try {
+            await asaas(`/subscriptions/${assinatura.id}`, {
+              method: 'PUT',
+              body: { externalReference: userId },
+            })
+          } catch (e) {
+            // Nao e fatal: o checkoutSession continua resolvendo.
+            console.warn('Nao consegui carimbar externalReference:', (e as Error).message)
+          }
+        }
+
+        // Este e o unico evento que serve aos DOIS metodos para iniciar o
+        // trial. No cartao ele so dispara depois do checkout hospedado
+        // concluir (cartao ja capturado). No PIX nada e pago hoje, entao
+        // CHECKOUT_PAID/PAYMENT_CONFIRMED nunca chegariam e o cliente ficaria
+        // preso em 'pending' pra sempre.
+        if (tipo === 'SUBSCRIPTION_CREATED') {
+          return json({
+            received: true,
+            vinculado: assinatura?.id,
+            ...(await iniciarTrial(userId, { subscription: { nextDueDate: assinatura?.nextDueDate } })),
+          })
+        }
+
+        return json({ received: true, vinculado: assinatura?.id })
+      }
+
+      case 'SUBSCRIPTION_DELETED':
+      case 'SUBSCRIPTION_INACTIVATED':
+        // Cancelamento nao corta na hora: quem pagou usa ate o fim do periodo.
+        return json({ received: true, ...(await cortarAcesso(userId, 'canceled')) })
+
+      default:
+        return json({ received: true, ignorado: tipo })
+    }
+  } catch (erro) {
+    console.error(`Erro processando ${tipo}:`, erro)
+    // 500 faz o Asaas reenviar — melhor repetir do que perder uma ativacao.
+    return json({ error: (erro as Error).message }, 500)
+  }
+})

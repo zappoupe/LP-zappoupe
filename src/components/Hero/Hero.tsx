@@ -12,7 +12,7 @@ const Check = () => (
     </svg>
 );
 
-const GARANTIAS = ['30 dias grátis', 'Sem cartão de crédito', 'Cancele quando quiser, sem multa'];
+const GARANTIAS = ['7 dias grátis', 'Sem cartão de crédito', 'Cancele quando quiser, sem multa'];
 
 export const Hero = () => (
     <section className="hero">

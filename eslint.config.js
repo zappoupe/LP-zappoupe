@@ -6,7 +6,11 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // supabase/functions roda em Deno, não no navegador: imports por URL,
+  // global Deno, e sem o pipeline do Vite. Passar a config do app React por
+  // cima só gera ruído (globals.browser não conhece Deno, react-refresh não
+  // se aplica). O lint desse código é feito por `deno check`.
+  globalIgnores(['dist', 'supabase/functions']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
