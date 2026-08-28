@@ -66,10 +66,20 @@ function emDias(dias: number, base = new Date()): string {
  * melhor do que mexer na assinatura de outra pessoa.
  */
 async function resolverUserId(obj: any): Promise<string | null> {
+  // NAO usar maybeSingle() aqui: ele devolve ERRO quando casa mais de uma
+  // linha, e duas linhas dividindo o mesmo asaas_customer_id acontecem por
+  // design — acharOuCriarCustomer reaproveita o customer por CPF, entao quem
+  // assina duas vezes com e-mails diferentes gera duas assinaturas apontando
+  // pro mesmo customer. O erro era engolido (so `data` era lido), a funcao
+  // devolvia null e o evento sumia com HTTP 200: ativacao perdida pra sempre.
   const porColuna = async (coluna: string, valor: string) => {
-    const { data } = await supabaseAdmin.from('assinaturas')
-      .select('id').eq(coluna, valor).maybeSingle()
-    return data?.id ?? null
+    const { data, error } = await supabaseAdmin.from('assinaturas')
+      .select('id')
+      .eq(coluna, valor)
+      .order('criado_em', { ascending: false, nullsFirst: false })
+      .limit(1)
+    if (error) throw new Error(`busca por ${coluna}: ${error.message}`)
+    return data?.[0]?.id ?? null
   }
 
   // 1. externalReference — so o CHECKOUT_PAID e o fluxo PIX trazem.
@@ -77,11 +87,18 @@ async function resolverUserId(obj: any): Promise<string | null> {
   if (ref && /^[0-9a-f-]{36}$/i.test(String(ref))) return String(ref)
 
   // 2. checkoutSession — o elo do fluxo de cartao.
+  //
+  // No CHECKOUT_PAID o proprio objeto E o checkout, entao o id dele chega em
+  // obj.id — nao em obj.checkoutSession, que so existe nos eventos derivados
+  // (assinatura e cobrancas). Antes so obj.checkoutSession era testado: se o
+  // externalReference nao viesse no payload, a resolucao falhava tendo o id
+  // exato em maos. Testa os dois.
   const sessao = typeof obj?.checkoutSession === 'string'
     ? obj.checkoutSession
     : obj?.checkoutSession?.id
-  if (sessao) {
-    const id = await porColuna('asaas_checkout_id', String(sessao))
+  for (const candidato of [sessao, obj?.id]) {
+    if (!candidato) continue
+    const id = await porColuna('asaas_checkout_id', String(candidato))
     if (id) return id
   }
 
@@ -102,10 +119,27 @@ async function resolverUserId(obj: any): Promise<string | null> {
 }
 
 async function lerAssinatura(userId: string) {
-  const { data } = await supabaseAdmin.from('assinaturas')
+  const { data, error } = await supabaseAdmin.from('assinaturas')
     .select('id, is_anual, plano, acesso_ate, status, asaas_customer_id, asaas_subscription_id')
     .eq('id', userId).maybeSingle()
+  if (error) throw new Error(`leitura da assinatura ${userId}: ${error.message}`)
   return data
+}
+
+/**
+ * Update que NAO falha em silencio.
+ *
+ * Todos os writes daqui ignoravam o `error` e devolviam 200 pro Asaas. Com
+ * isso qualquer falha de escrita — indisponibilidade, constraint, coluna
+ * ausente — virava uma ativacao perdida sem rastro: o Asaas marcava a entrega
+ * como bem-sucedida e nunca reenviava o evento. Agora o erro sobe, o handler
+ * devolve 500 e o Asaas retenta, que e exatamente o comportamento que o
+ * comentario do catch la embaixo ja prometia.
+ */
+async function atualizarAssinatura(userId: string, patch: Record<string, unknown>) {
+  const { error } = await supabaseAdmin.from('assinaturas')
+    .update(patch).eq('id', userId)
+  if (error) throw new Error(`update da assinatura ${userId}: ${error.message}`)
 }
 
 /** Cartao capturado no checkout hospedado: comeca o periodo de teste. */
@@ -128,7 +162,7 @@ async function iniciarTrial(userId: string, checkout: any) {
   const custId = typeof checkout?.customer === 'string' ? checkout.customer : checkout?.customer?.id
   if (custId) patch.asaas_customer_id = custId
 
-  await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+  await atualizarAssinatura(userId, patch)
   return { ok: true, status: 'trialing' }
 }
 
@@ -148,7 +182,7 @@ async function confirmarPagamento(userId: string, pagamento: any) {
   if (custId) patch.asaas_customer_id = custId
   if (pagamento?.subscription) patch.asaas_subscription_id = pagamento.subscription
 
-  await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+  await atualizarAssinatura(userId, patch)
 
   // Extrato so recebe dinheiro que entrou. A versao do Stripe gravava as
   // faturas de R$ 0,00 do trial e por isso 54 das 57 linhas eram zeradas.
@@ -179,14 +213,12 @@ async function cortarAcesso(userId: string, motivo: string, imediato = false) {
     limite.setUTCDate(limite.getUTCDate() + DIAS_CARENCIA)
     if (limite > new Date()) {
       // Periodo pago ainda de pe: marca a pendencia mas NAO tira o acesso.
-      await supabaseAdmin.from('assinaturas').update({ status: motivo }).eq('id', userId)
+      await atualizarAssinatura(userId, { status: motivo })
       return { ok: true, mantido: true, acesso_ate: assinatura.acesso_ate }
     }
   }
 
-  await supabaseAdmin.from('assinaturas')
-    .update({ ativo: false, status: motivo })
-    .eq('id', userId)
+  await atualizarAssinatura(userId, { ativo: false, status: motivo })
   return { ok: true, cortado: true }
 }
 
@@ -248,7 +280,7 @@ serve(async (req) => {
         const custId = typeof assinatura?.customer === 'string'
           ? assinatura.customer : assinatura?.customer?.id
         if (custId) patch.asaas_customer_id = custId
-        await supabaseAdmin.from('assinaturas').update(patch).eq('id', userId)
+        await atualizarAssinatura(userId, patch)
 
         // Carimba o nosso user_id na assinatura la no Asaas. Ela nasce sem
         // externalReference quando vem do checkout hospedado, e sem isso todo
