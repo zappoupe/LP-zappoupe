@@ -38,6 +38,22 @@ function json(body: unknown, status = 200) {
   })
 }
 
+/**
+ * rodrigoogravena@gmail.com -> rod***************@gmail.com
+ *
+ * Mascarado porque a mensagem de conflito e devolvida pra quem so digitou um
+ * telefone: sem mascara, o checkout viraria um consultor de "que e-mail usa
+ * este numero?". O prefixo basta pra pessoa reconhecer a propria conta.
+ *
+ * null quando nao ha e-mail utilizavel (linha legada): quem chama troca a
+ * mensagem em vez de escrever "na conta outra conta".
+ */
+function mascararEmail(email: string): string | null {
+  const [usuario, dominio] = String(email ?? '').split('@')
+  if (!dominio || !usuario) return null
+  return `${usuario.slice(0, 3)}${'*'.repeat(Math.max(usuario.length - 3, 1))}@${dominio}`
+}
+
 /** Acha o usuario do Auth pelo email, paginando. null se nao existir. */
 async function acharUsuarioPorEmail(email: string) {
   const alvo = email.toLowerCase()
@@ -96,6 +112,45 @@ serve(async (req) => {
     const valor = calcularValor(plano, isAnual, extras)
     const vencimento = primeiroVencimento(TRIAL_DAYS)
 
+    // ── 0. O telefone ja pertence a uma assinatura ATIVA de OUTRA conta? ──
+    //
+    // E daqui que nascem as contas gemeas. Caso real (Rodrigo Gravena):
+    // abandonou o checkout as 16:05 e refez as 16:10 com o e-mail escrito
+    // diferente. Ficou com duas linhas no mesmo telefone — o bot passou a
+    // gravar os gastos na conta que pagou e ele seguiu logando na outra,
+    // vendo o painel vazio. Barrar aqui e o unico ponto onde da pra impedir
+    // o par de nascer; depois so resta juntar as contas na mao.
+    //
+    // Roda ANTES de tocar no Auth: recusar depois deixaria um usuario orfao.
+    // Mesmo e-mail passa direto — e a propria pessoa renovando ou trocando
+    // de plano, nao uma conta gemea.
+    //
+    // Compara por telefone_digitos, NUNCA pela coluna crua: 48 das 59 linhas
+    // guardam o telefone formatado ('(44) 99181-1985') e 7 das 10 assinaturas
+    // ativas estao nesse formato. Uma comparacao exata na coluna crua nao veria
+    // nenhuma delas — a checagem passaria batido justamente nos casos legados.
+    // Ver a migration 20260904090000.
+    const { data: mesmoTelefone, error: erroTelefone } = await supabaseAdmin
+      .from('assinaturas')
+      .select('email')
+      .eq('telefone_digitos', celular)
+      .eq('ativo', true)
+      .limit(5)
+    if (erroTelefone) throw erroTelefone
+
+    const gemea = mesmoTelefone?.find((a) => (a.email ?? '').toLowerCase() !== email)
+    if (gemea) {
+      const conta = mascararEmail(gemea.email ?? '')
+      return json({
+        error: conta
+          ? `Este celular ja tem uma assinatura ativa na conta ${conta}. Entre com esse `
+            + `e-mail para gerenciar o seu plano. Se voce nao reconhece essa conta, fale `
+            + `com o suporte antes de assinar de novo.`
+          : `Este celular ja tem uma assinatura ativa em outra conta. Fale com o suporte `
+            + `para recuperar o acesso antes de assinar de novo.`,
+      }, 409)
+    }
+
     // ── 1. Conta no Auth (cria ou atualiza a senha de quem ja existia) ──
     let userId: string | undefined
 
@@ -121,7 +176,24 @@ serve(async (req) => {
     if (!userId) return json({ error: 'Nao foi possivel criar o usuario.' }, 400)
 
     // ── 2. Assinatura PENDENTE. Quem libera e o webhook, nunca esta funcao. ──
-    const { error: erroAssinatura } = await supabaseAdmin.from('assinaturas').upsert({
+    //
+    // ATENCAO: este upsert vira UPDATE quando a linha ja existe, entao ele
+    // NAO pode rebaixar quem ja esta pagando. Antes ele gravava ativo=false
+    // e trocava o acesso_ate real por fim-de-trial sem olhar o estado atual:
+    // bastava um cliente ativo reabrir o checkout — trocar de plano, clicar
+    // de novo no CTA da LP — e abandonar pra sair de la inativo, com o
+    // periodo pago apagado e NADA que o trouxesse de volta, porque checkout
+    // abandonado nao gera webhook nenhum.
+    //
+    // Regra: quem ja tem acesso so muda de estado pela mao do webhook.
+    const { data: atual, error: erroAtual } = await supabaseAdmin
+      .from('assinaturas')
+      .select('ativo, acesso_ate')
+      .eq('id', userId)
+      .maybeSingle()
+    if (erroAtual) throw erroAtual
+
+    const linha: Record<string, unknown> = {
       id: userId,
       nome,
       email,
@@ -129,15 +201,28 @@ serve(async (req) => {
       plano,
       is_anual: isAnual,
       membros_extras: extras,
-      ativo: false,
-      status: 'pending',
       gateway: 'asaas',
       metodo_pagamento: metodo,
+    }
+
+    if (atual?.ativo === true) {
+      // Cliente em dia refazendo o checkout: ativo, status e acesso_ate ficam
+      // exatamente como estao. O ciclo novo so entra quando o pagamento
+      // confirmar, e ate la o periodo que ele ja pagou continua valendo.
+      console.log(
+        `Checkout reaberto pelo assinante ativo ${userId}; acesso preservado ` +
+        `(acesso_ate=${atual.acesso_ate ?? 'sem data'}).`,
+      )
+    } else {
+      linha.ativo = false
+      linha.status = 'pending'
       // Fim do trial gravado aqui, onde a data e conhecida com certeza. O
       // webhook nao recalcula: o Asaas responde nextDueDate ja avancado um
-      // ciclo e derivar dali daria 60 dias gratis em vez de 30.
-      acesso_ate: new Date(`${vencimento}T00:00:00Z`).toISOString(),
-    })
+      // ciclo e derivar dali daria o dobro do trial de graca.
+      linha.acesso_ate = new Date(`${vencimento}T00:00:00Z`).toISOString()
+    }
+
+    const { error: erroAssinatura } = await supabaseAdmin.from('assinaturas').upsert(linha)
     if (erroAssinatura) throw erroAssinatura
 
     // ── 3. Abre a cobranca no Asaas ──

@@ -126,6 +126,60 @@ async function lerAssinatura(userId: string) {
   return data
 }
 
+/** Codigo do Postgres para violacao de restricao unica. */
+const VIOLACAO_UNICIDADE = '23505'
+
+/**
+ * Tira de campo a assinatura antiga que ocupa o mesmo telefone.
+ *
+ * A migration 20260828120000 garante no maximo UMA linha ativa por telefone.
+ * Boa invariante, mas sem tratamento ela se volta contra o cliente: quando
+ * alguem assina de novo com outro e-mail e a linha antiga ainda esta ativa, o
+ * `ativo = true` da ativacao bate no indice, o update falha, o handler devolve
+ * 500 e o Asaas retenta pra sempre — a conta que ACABOU DE PAGAR nunca ativa,
+ * e nada disso aparece pra quem pagou.
+ *
+ * Criterio: quem pagou agora fica com o telefone; a linha antiga sai.
+ *
+ * O historico de `transactions` NAO e migrado aqui de proposito — mover dado
+ * financeiro de cliente e decisao humana, nao efeito colateral de webhook. O
+ * console.error abaixo e o gatilho pro suporte juntar as duas contas.
+ */
+async function liberarTelefoneDuplicado(userId: string): Promise<boolean> {
+  // telefone_digitos, nao a coluna crua: a linha antiga costuma ser legada e
+  // estar formatada, e comparar string crua nao acharia a duplicata que o
+  // proprio indice acabou de barrar. Ver a migration 20260904090000.
+  const { data: alvo, error: erroAlvo } = await supabaseAdmin.from('assinaturas')
+    .select('telefone_digitos').eq('id', userId).maybeSingle()
+  if (erroAlvo) throw new Error(`leitura do telefone de ${userId}: ${erroAlvo.message}`)
+  if (!alvo?.telefone_digitos) return false
+
+  const { data: antigas, error: erroBusca } = await supabaseAdmin.from('assinaturas')
+    .select('id, email')
+    .eq('telefone_digitos', alvo.telefone_digitos)
+    .eq('ativo', true)
+    .neq('id', userId)
+  if (erroBusca) {
+    throw new Error(`busca de duplicata no telefone ${alvo.telefone_digitos}: ${erroBusca.message}`)
+  }
+  if (!antigas?.length) return false
+
+  for (const antiga of antigas) {
+    const { error } = await supabaseAdmin.from('assinaturas')
+      .update({ ativo: false, status: 'substituida' })
+      .eq('id', antiga.id)
+    if (error) throw new Error(`desativacao da duplicata ${antiga.id}: ${error.message}`)
+
+    console.error(
+      `CONTAS GEMEAS no telefone ${alvo.telefone_digitos}: assinatura ${antiga.id} (${antiga.email}) ` +
+      `desativada em favor de ${userId}, que acabou de pagar. As transactions antigas ` +
+      `continuam sob ${antiga.id} — juntar as contas manualmente.`,
+    )
+  }
+
+  return true
+}
+
 /**
  * Update que NAO falha em silencio.
  *
@@ -135,11 +189,31 @@ async function lerAssinatura(userId: string) {
  * como bem-sucedida e nunca reenviava o evento. Agora o erro sobe, o handler
  * devolve 500 e o Asaas retenta, que e exatamente o comportamento que o
  * comentario do catch la embaixo ja prometia.
+ *
+ * Trata ainda a colisao do indice de telefone unico, que sem isso deixaria
+ * o Asaas retentando pra sempre uma ativacao que nunca passa: ver
+ * liberarTelefoneDuplicado acima.
  */
 async function atualizarAssinatura(userId: string, patch: Record<string, unknown>) {
   const { error } = await supabaseAdmin.from('assinaturas')
     .update(patch).eq('id', userId)
-  if (error) throw new Error(`update da assinatura ${userId}: ${error.message}`)
+  if (!error) return
+
+  // Ativacao barrada por outra linha ativa no mesmo telefone: resolve e repete.
+  // So para ativacao — num corte de acesso a colisao nao faz sentido e o erro
+  // deve subir normalmente.
+  if (error.code === VIOLACAO_UNICIDADE && patch.ativo === true) {
+    if (await liberarTelefoneDuplicado(userId)) {
+      const { error: erroRepetido } = await supabaseAdmin.from('assinaturas')
+        .update(patch).eq('id', userId)
+      if (!erroRepetido) return
+      throw new Error(
+        `update da assinatura ${userId} apos liberar o telefone: ${erroRepetido.message}`,
+      )
+    }
+  }
+
+  throw new Error(`update da assinatura ${userId}: ${error.message}`)
 }
 
 /** Cartao capturado no checkout hospedado: comeca o periodo de teste. */

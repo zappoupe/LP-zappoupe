@@ -152,6 +152,25 @@ serve(async (req) => {
         return new Response(JSON.stringify({ received: true, deactivated: true }), { status: 200 });
       }
 
+      case 'customer.subscription.updated': {
+        // Reflete no banco um cancelamento agendado (cancel_at_period_end),
+        // inclusive quando feito direto no painel do Stripe pelo suporte.
+        // Nao mexe em `ativo`: o acesso segue ate o fim do periodo, quando
+        // chega o 'customer.subscription.deleted'.
+        //
+        // Portado do zappoupe-user (commit 30a3856). Esta copia da funcao
+        // nasceu antes desse fix e ficou sem o handler — deployar daqui sem
+        // ele reabriria o bug do cancelamento que nao aparecia no painel.
+        const sub = event.data.object;
+        if (sub.cancel_at_period_end) {
+          await supabaseAdmin
+            .from('assinaturas')
+            .update({ status: 'canceling' })
+            .eq('stripe_subscription_id', sub.id);
+        }
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
+
       case 'customer.subscription.deleted': {
         const sub = event.data.object;
         await deactivateBySubscription(sub.id);
